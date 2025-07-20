@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{851928dc-05e2-4428-8b88-01eb92f286e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IocpCore">
+      <UniqueIdentifier>{4fd23619-13dc-4a09-b97f-fa5366fcc9dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{eca48b48-ce23-428a-b88f-6c2e56879e5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Listener">
+      <UniqueIdentifier>{ab5f78fc-5a26-4f14-a0e0-dddf65d72e01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NetworkManager">
+      <UniqueIdentifier>{8c8bd5a0-27cc-4f97-b6df-5e15f753d8a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ringbuffer">
+      <UniqueIdentifier>{a0d7479a-6b5c-4cea-ba15-3ae8790152db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PacketDispatcher">
+      <UniqueIdentifier>{265eff53-02b4-4379-a77e-f71835e70bc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PacketHandlers">
+      <UniqueIdentifier>{e0780de9-54f3-4f5a-a419-b247e2e7ea3c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="SocketUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpContext.h">
+      <Filter>IocpCore</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpCore.h">
+      <Filter>IocpCore</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManager.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>NetworkManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Ringbuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketDispatcher.h">
+      <Filter>PacketDispatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandlers.h">
+      <Filter>PacketHandlers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>IocpCore</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManager.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>NetworkManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>Ringbuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketDispatcher.cpp">
+      <Filter>PacketDispatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandlers.cpp">
+      <Filter>PacketHandlers</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

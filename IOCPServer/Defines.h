@@ -1,0 +1,13 @@
+#pragma once
+
+// 버퍼 및 연결 수 설정
+#define MAX_BUFFER_SIZE      4096
+#define MAX_CLIENT_COUNT     10000
+#define MAX_WORKER_THREADS   8
+
+// 포트 고정값 (테스트용)
+#define DEFAULT_PORT         7777
+
+// 로그 및 디버그 매크로
+#define LOG(x) std::cout << x << std::endl;
+#define ERROR_LOG(x) std::cerr << "[ERROR] " << x << std::endl;

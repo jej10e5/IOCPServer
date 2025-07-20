@@ -1,0 +1,111 @@
+#include "IocpCore.h"
+#include "NetworkManager.h"
+
+bool IocpCore::Initialize()
+{
+    m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+
+    if (m_iocpHandle == NULL)
+    {
+        ERROR_LOG("CreateIoCompletionPort 실패 : " << GetLastError());
+        return false;
+    }
+
+    return true;
+}
+
+/// <summary>
+/// 소켓을 IOCP 핸들에 등록하는 함수
+/// </summary>
+/// <param name="_sock"></param>
+/// <param name="_key"></param>
+bool IocpCore::RegisterSocket(SOCKET _sock, ULONG_PTR _key)
+{
+    // CreateIoCompletionPort를 이용해서 소켓을 IOCP에 등록해보자.
+    HANDLE result = CreateIoCompletionPort(
+        reinterpret_cast<HANDLE>(_sock), 
+        m_iocpHandle, // iocp 핸들
+        _key,         // i/o 완료 시 넘어올 키
+        0);           // 처음 등록일 땐 무시됨
+    
+    LOG("RegisterSocket 호출 - m_iocpHandle: " << m_iocpHandle << ", sock: " << _sock);
+
+
+    // 실패할 수도 있으니까 예외 처리도 해주자.
+    if (result == NULL)
+    {
+        ERROR_LOG("CreateIoCompletionPort 등록 실패 : " << GetLastError());
+        return false;
+    }
+
+    return true;
+}
+
+void IocpCore::Run()
+{
+    m_isRunning = true;
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo(&systemInfo);
+    INT32 i32ThreadCount = systemInfo.dwNumberOfProcessors * 2; // 권장 사양
+
+    for (int i = 0;i < i32ThreadCount;i++)
+    {
+        m_workerThreads.emplace_back([this]() {
+            this->WorkerLoop();
+            });
+    }
+}
+
+void IocpCore::ShutDown()
+{
+}
+
+void IocpCore::WorkerLoop()
+{
+    while (m_isRunning)
+    {
+        DWORD bytesTransferred = 0;
+        ULONG_PTR completionKey = 0; // 소켓 식별자로 사용
+        OVERLAPPED* overlapped = nullptr; // I/O요청 시 넘긴 context 구조체 포인터
+
+        //GQCS 호출 - IOCP 큐에서 작업 꺼내는 WinAPI함수
+        // IO 이벤트 수신
+        BOOL result = GetQueuedCompletionStatus(
+            m_iocpHandle,
+            &bytesTransferred,
+            &completionKey,
+            &overlapped,
+            INFINITE
+        );
+
+        if (!m_isRunning) break; // 종료 플래그 확인
+
+        if (result == FALSE || overlapped == nullptr)
+        {
+            // 소켓이 닫혔거나 오류 발생 → 세션 정리 예정
+            continue;
+        }
+
+        // IocpContext로 캐스팅 (OVERLAPPED 확장 구조)
+        IocpContext* pContext = reinterpret_cast<IocpContext*>(overlapped);
+
+        // 작업 종류에 따라 분기
+        switch (pContext->eOperation)
+        {
+        case IocpOperation::RECV:
+            pContext->pSession->OnRecvCompleted(pContext, bytesTransferred);
+            break;
+        case IocpOperation::SEND:
+            pContext->pSession->OnSendCompleted(pContext, bytesTransferred);
+            break;
+        case IocpOperation::ACCEPT:
+            pContext->pSession->OnAcceptCompleted(pContext);
+            break;
+        default:
+            break;
+        }
+
+        delete pContext;
+    }
+}
+
