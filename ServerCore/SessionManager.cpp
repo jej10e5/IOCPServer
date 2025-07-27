@@ -1,5 +1,7 @@
+#include "pch.h"
 #include "SessionManager.h"
 #include "Session.h"
+class Session;
 void SessionManager::Init()
 {
 	for (int i = 0;i < MAX_SESSION_SIZE;i++)

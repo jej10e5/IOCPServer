@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "NetworkManager.h"
 
 void NetworkManager::Init()
@@ -8,6 +9,7 @@ void NetworkManager::Init()
 
 SOCKET NetworkManager::GetListenerSocket()
 {
+
 	return m_Listener.GetListenSocket();
 }
 

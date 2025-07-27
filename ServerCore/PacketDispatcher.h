@@ -28,6 +28,5 @@ struct PacketHandlerRegistrar
 	}
 };
 
-#define REGISTER_HANDLER(ID, FUNC) \
-		static PacketHandlerRegistrar _reg_##ID(ID, FUNC)
+#define REGISTER_HANDLER(ID, FUNC) static PacketHandlerRegistrar _reg_##ID(ID, FUNC)
 

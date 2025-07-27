@@ -19,29 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IocpContext.h" />
-    <ClInclude Include="IocpCore.h" />
-    <ClInclude Include="Listener.h" />
-    <ClInclude Include="NetworkManager.h" />
-    <ClInclude Include="PacketDispatcher.h" />
-    <ClInclude Include="PacketHandlers.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="RingBuffer.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionManager.h" />
-    <ClInclude Include="SocketUtils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="IocpCore.cpp" />
-    <ClCompile Include="Listener.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="NetworkManager.cpp" />
-    <ClCompile Include="PacketDispatcher.cpp" />
-    <ClCompile Include="PacketHandlers.cpp" />
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="RingBuffer.cpp" />
-    <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -54,26 +32,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

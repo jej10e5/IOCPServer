@@ -24,13 +24,13 @@ public:
 	}
 	void Init();
 	bool Recv();
-	void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen);
+	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
 	void OnAcceptCompleted(IocpContext* _pContext);
 	void Disconnect();
 
 	// 패킷 구현부
-	void SendPacket(const char* _pData, INT32 _i32Len);
+	void SendPacket(const char* _pData, INT32 _i32Len) ;
 
 
 private: 
@@ -45,4 +45,5 @@ private:
 	std::mutex m_SendLock;
 	bool m_bIsSending = false; // 현재 전송 중 여부
 };
+
 

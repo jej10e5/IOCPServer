@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="IocpCore.cpp" />
+    <ClCompile Include="Listener.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="PacketDispatcher.cpp" />
+    <ClCompile Include="PacketHandlers.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="ServerCore.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
+    <ClCompile Include="Session.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>NetworkManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>RingBuffer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IocpContext.h" />
+    <ClInclude Include="IocpCore.h" />
+    <ClInclude Include="Listener.h" />
+    <ClInclude Include="PacketDispatcher.h" />
+    <ClInclude Include="PacketHandlers.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SessionManager.h" />
+    <ClInclude Include="SocketUtils.h" />
+    <ClInclude Include="Session.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>NetworkManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>RingBuffer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Session">
+      <UniqueIdentifier>{a889542d-3b32-47e1-a500-f9830c2d816e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NetworkManager">
+      <UniqueIdentifier>{884e576f-50ab-49e6-bc98-162f6e082417}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter2">
+      <UniqueIdentifier>{2c8b1234-a92f-4b99-9ef2-de4b230d5c34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter3">
+      <UniqueIdentifier>{9435a9a0-3f01-4556-a44b-a4c948a0304d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter4">
+      <UniqueIdentifier>{9428c68b-3f69-41cb-9112-4f39164b1f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter5">
+      <UniqueIdentifier>{3ba8eb39-bb82-41fa-92ad-08187b4a7898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter6">
+      <UniqueIdentifier>{503b8fd8-e10d-4dd4-9241-f3a6ed8a43da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter7">
+      <UniqueIdentifier>{edef6727-4491-41d2-9314-6e5ce46db296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RingBuffer">
+      <UniqueIdentifier>{a02f9735-a7cb-4731-ab1b-0320a4e4f692}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
