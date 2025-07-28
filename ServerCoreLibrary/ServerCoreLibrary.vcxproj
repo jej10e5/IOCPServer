@@ -27,7 +27,6 @@
     <ClCompile Include="PacketHandlers.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
-    <ClCompile Include="ServerCore.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
   </ItemGroup>
@@ -42,7 +41,6 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />
-    <ClInclude Include="SocketUtils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

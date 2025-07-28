@@ -1,14 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="IocpCore.cpp" />
-    <ClCompile Include="Listener.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PacketDispatcher.cpp" />
-    <ClCompile Include="PacketHandlers.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="ServerCore.cpp" />
-    <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="Session.cpp">
       <Filter>Session</Filter>
     </ClCompile>
@@ -18,16 +12,24 @@
     <ClCompile Include="RingBuffer.cpp">
       <Filter>RingBuffer</Filter>
     </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Listener</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketDispatcher.cpp">
+      <Filter>PacketDispatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandlers.cpp">
+      <Filter>PacketHandlers</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManager.cpp">
+      <Filter>SessionManager</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>IocpCore</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IocpContext.h" />
-    <ClInclude Include="IocpCore.h" />
-    <ClInclude Include="Listener.h" />
-    <ClInclude Include="PacketDispatcher.h" />
-    <ClInclude Include="PacketHandlers.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SessionManager.h" />
-    <ClInclude Include="SocketUtils.h" />
     <ClInclude Include="Session.h">
       <Filter>Session</Filter>
     </ClInclude>
@@ -37,6 +39,24 @@
     <ClInclude Include="RingBuffer.h">
       <Filter>RingBuffer</Filter>
     </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Listener</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketDispatcher.h">
+      <Filter>PacketDispatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandlers.h">
+      <Filter>PacketHandlers</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManager.h">
+      <Filter>SessionManager</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpCore.h">
+      <Filter>IocpCore</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpContext.h">
+      <Filter>IocpCore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Session">
@@ -45,26 +65,23 @@
     <Filter Include="NetworkManager">
       <UniqueIdentifier>{884e576f-50ab-49e6-bc98-162f6e082417}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NewFilter2">
-      <UniqueIdentifier>{2c8b1234-a92f-4b99-9ef2-de4b230d5c34}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NewFilter3">
-      <UniqueIdentifier>{9435a9a0-3f01-4556-a44b-a4c948a0304d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NewFilter4">
-      <UniqueIdentifier>{9428c68b-3f69-41cb-9112-4f39164b1f05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NewFilter5">
-      <UniqueIdentifier>{3ba8eb39-bb82-41fa-92ad-08187b4a7898}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NewFilter6">
-      <UniqueIdentifier>{503b8fd8-e10d-4dd4-9241-f3a6ed8a43da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="NewFilter7">
-      <UniqueIdentifier>{edef6727-4491-41d2-9314-6e5ce46db296}</UniqueIdentifier>
-    </Filter>
     <Filter Include="RingBuffer">
       <UniqueIdentifier>{a02f9735-a7cb-4731-ab1b-0320a4e4f692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Listener">
+      <UniqueIdentifier>{2c8b1234-a92f-4b99-9ef2-de4b230d5c34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PacketDispatcher">
+      <UniqueIdentifier>{9435a9a0-3f01-4556-a44b-a4c948a0304d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PacketHandlers">
+      <UniqueIdentifier>{9428c68b-3f69-41cb-9112-4f39164b1f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SessionManager">
+      <UniqueIdentifier>{3ba8eb39-bb82-41fa-92ad-08187b4a7898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IocpCore">
+      <UniqueIdentifier>{503b8fd8-e10d-4dd4-9241-f3a6ed8a43da}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

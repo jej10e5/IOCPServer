@@ -14,6 +14,14 @@ struct SendBuffer
 
 };
 
+enum class SessionType
+{
+	CLIENT, // 클라이언트 세션
+	GATE,  // 게이트 세션
+	LOGIN, // 로그인 세션
+	GAME,  // 게임 세션
+};	
+
 
 class Session
 {
@@ -24,6 +32,7 @@ public:
 	}
 	void Init();
 	bool Recv();
+	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐
 	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
 	void OnAcceptCompleted(IocpContext* _pContext);

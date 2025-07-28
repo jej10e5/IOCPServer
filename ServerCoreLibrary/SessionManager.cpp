@@ -2,13 +2,15 @@
 #include "SessionManager.h"
 #include "Session.h"
 class Session;
-void SessionManager::Init()
+void SessionManager::Init(std::function<Session* ()> fnCreate)
 {
+	m_fnCreateSession = fnCreate;
 	for (int i = 0;i < MAX_SESSION_SIZE;i++)
 	{
-		m_SessionPool.emplace(new Session());
+		m_SessionPool.emplace(m_fnCreateSession());
 	}
 }
+
 
 Session* SessionManager::GetEmptySession()
 {
@@ -16,7 +18,7 @@ Session* SessionManager::GetEmptySession()
 
 	if (m_SessionPool.empty())
 	{
-		m_SessionPool.emplace(new Session());
+		m_SessionPool.emplace(m_fnCreateSession());
 	}
 
 	Session* pTempSession = m_SessionPool.top();
