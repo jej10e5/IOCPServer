@@ -6,7 +6,7 @@ class NetworkManager:public Singleton<NetworkManager>
 {
 	friend class Singleton<NetworkManager>;
 public:
-	void Init();
+	void Init(UINT16 _uiPort);
 	SOCKET GetListenerSocket();
 	void AcceptListener();
 private:

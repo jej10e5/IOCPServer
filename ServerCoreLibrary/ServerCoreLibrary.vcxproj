@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="IocpCore.cpp" />
     <ClCompile Include="Listener.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="PacketDispatcher.cpp" />
     <ClCompile Include="PacketHandlers.cpp" />

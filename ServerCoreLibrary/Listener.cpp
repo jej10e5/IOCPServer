@@ -26,7 +26,7 @@ bool Listener::Init(UINT16 _port)
 	// m_ListenSocket 소켓에 특정 IP 주소와 포트 번호를 명시적으로 지정해서
 	// os가 이 소켓에 접근 할 수 있도록 등록
 	// 이 ip/port 조합은 내가 사용할거야 라고 os에 선언
-	if (bind(m_ListenSocket, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR)
+	if (::bind(m_ListenSocket, (SOCKADDR*)&addr, sizeof(addr)) == SOCKET_ERROR)
 	{
 		ERROR_LOG("bind 실패 : " << WSAGetLastError());
 		closesocket(m_ListenSocket);

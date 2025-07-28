@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "NetworkManager.h"
 
-void NetworkManager::Init()
+void NetworkManager::Init(UINT16 _uiPort)
 {
-	m_Listener.Init(DEFAULT_PORT);
+	m_Listener.Init(_uiPort);
 	m_Listener.PostAccept();
 }
 
