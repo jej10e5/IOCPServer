@@ -1,11 +1,25 @@
-#include "pch.h"
+#include "../ServerCommon/pch.h"
 #include "SessionManager.h"
 #include "ClientSession.h"
 #include "NetworkManager.h"
 #include "IocpCore.h"
+#include "../ServerCommon/ConfigReader.h"
+#include <filesystem>
+
+static std::wstring GetExeDir()
+{
+    wchar_t buf[MAX_PATH];
+    DWORD n = ::GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    return std::filesystem::path(buf, buf + n).parent_path().wstring();
+}
 
 int main()
 {
+
+    std::wstring iniPath = GetExeDir() + L"\\Server.ini";
+    ConfigReader configReader(iniPath.c_str());   // ← 이걸로!
+    UINT16 port = static_cast<UINT16>(configReader.GetInt(L"Network", L"Port", 7777));
+
     // 1. Winsock 초기화
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -29,7 +43,7 @@ int main()
 
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
-    network.Init(7777);
+    network.Init(port);
     // 5. Accept 시작
     network.AcceptListener();
    
@@ -39,7 +53,10 @@ int main()
     // 6. IOCP 루프 진입
     iocp.Run();
 
-    // 7. 종료 정리
+    // 7. 종료 처리
+	iocp.ShutDown();
+
+
     WSACleanup();
 
     return 0;

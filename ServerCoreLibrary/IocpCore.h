@@ -28,8 +28,22 @@ public:
 private:
 	// 생성자, 소멸자 선언 안해두면 public형으로 컴파일러가 자동 생성해서
 	// 그 접근도 막고자 private으로 선언함
-	IocpCore() = default;
-	~IocpCore() = default;
+	IocpCore()
+	{
+		m_iocpHandle = NULL;
+		m_isRunning = false;
+
+	}
+
+	~IocpCore() 
+	{
+		ShutDown();
+		if (m_iocpHandle != NULL)
+		{
+			CloseHandle(m_iocpHandle);
+			m_iocpHandle = NULL;
+		}
+	}
 
 
 private:

@@ -59,6 +59,37 @@ void IocpCore::Run()
 
 void IocpCore::ShutDown()
 {
+	if (!m_isRunning.exchange(false))
+    {
+		// 이미 종료 중인 경우
+		return;
+	}
+
+	for (size_t i = 0; i < m_workerThreads.size(); ++i)
+    {
+		::PostQueuedCompletionStatus(m_iocpHandle, 0, /*QUIT_KEY*/ 0xFFFFFFFF, nullptr); // 워커 스레드에게 종료 신호 전송
+	}
+
+
+	// 모든 워커 스레드가 종료될 때까지 대기
+	for (auto& thread : m_workerThreads)
+	{
+		if (thread.joinable())
+		{
+			thread.join();
+		}
+	}
+
+    m_workerThreads.clear();
+
+	// IOCP 핸들 닫기
+	if (m_iocpHandle != NULL)
+	{
+		CloseHandle(m_iocpHandle);
+		m_iocpHandle = NULL;
+	}
+
+	LOG("IOCP Core 종료");
 }
 
 void IocpCore::WorkerLoop()
