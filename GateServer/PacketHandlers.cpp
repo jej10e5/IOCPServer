@@ -1,9 +1,9 @@
-#include "pch.h"
-#include "PacketDispatcher.h"
-#include "PacketHandlers.h"
+#include "../ServerCommon/pch.h"
 #include "Session.h"
+#include "PacketID.h"
+#include "PacketDispatcher.h"
 
-void Handle_Eco(Session* _pSession, const char* _pData, UINT16 _ui16size)
+static void Handle_Eco_Gate(Session* _pSession, const char* _pData, UINT16 _ui16size)
 {
 	std::string msg(_pData + PACKET_HEADER_SIZE, _ui16size - PACKET_HEADER_SIZE);
 	LOG("echo : " << msg);
@@ -16,4 +16,4 @@ void Handle_Eco(Session* _pSession, const char* _pData, UINT16 _ui16size)
 }
 
 
-REGISTER_HANDLER(static_cast<uint16_t>(PacketID::ECHO), Handle_Eco);
+REGISTER_HANDLER(CM_ECHO, Handle_Eco_Gate);

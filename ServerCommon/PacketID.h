@@ -1,3 +1,12 @@
 #pragma once
 #include "pch.h"
-constexpr UINT16 PACKET_ID_ECHO = 1;
+
+enum PacketID : UINT16
+{
+    CM_ECHO = 1,
+    CM_CHAT,
+    SM_ECHO,
+    SM_CHAT,
+    CM_LOGIN,
+    SM_LOGIN,
+};

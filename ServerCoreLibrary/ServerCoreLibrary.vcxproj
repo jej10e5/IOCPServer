@@ -23,7 +23,6 @@
     <ClCompile Include="Listener.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="PacketDispatcher.cpp" />
-    <ClCompile Include="PacketHandlers.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="Session.cpp" />
@@ -35,7 +34,6 @@
     <ClInclude Include="Listener.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="PacketDispatcher.h" />
-    <ClInclude Include="PacketHandlers.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Session.h" />

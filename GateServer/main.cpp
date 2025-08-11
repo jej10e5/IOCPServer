@@ -53,6 +53,12 @@ int main()
     // 6. IOCP 루프 진입
     iocp.Run();
 
+
+    while (true)
+    {
+        Sleep(1000);
+    }
+
     // 7. 종료 처리
 	iocp.ShutDown();
 

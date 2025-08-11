@@ -7,6 +7,7 @@
 
 // 포트 고정값 (테스트용)
 #define DEFAULT_PORT         7777
+#define GATE_PORT         8888
 
 // 로그 및 디버그 매크로
 #define LOG(x) std::cout << x << std::endl;
