@@ -5,10 +5,13 @@ class  Session;
 class SessionManager:public Singleton<SessionManager>
 {
 	friend class Singleton<SessionManager>;
+
 public:
+	typedef std::function<Session* ()> SessionFactory;
+
 	void Init(std::function<Session*()> fnCreate);
 	
-	Session* GetEmptySession();
+	Session* GetEmptySession(SessionFactory _factory);
 	void Release(Session* _pSession);
 
 private:

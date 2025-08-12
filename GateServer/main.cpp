@@ -1,9 +1,11 @@
 #include "../ServerCommon/pch.h"
-#include "SessionManager.h"
-#include "ClientSession.h"
-#include "NetworkManager.h"
-#include "IocpCore.h"
 #include "../ServerCommon/ConfigReader.h"
+#include "IocpCore.h"
+#include "GatePacketHandler.h"
+#include "SessionManager.h"
+#include "NetworkManager.h"
+#include "ClientSession.h"
+#include "ServerSession.h"
 #include <filesystem>
 
 static std::wstring GetExeDir()
@@ -13,12 +15,19 @@ static std::wstring GetExeDir()
     return std::filesystem::path(buf, buf + n).parent_path().wstring();
 }
 
+void InitGateHandlers()
+{
+	// 패킷 핸들러 등록
+	REGISTER_HANDLER(CM_ECHO, GatePacketHandler::Handle_Eco);
+}
+
 int main()
 {
 
     std::wstring iniPath = GetExeDir() + L"\\Server.ini";
     ConfigReader configReader(iniPath.c_str());   // ← 이걸로!
-    UINT16 port = static_cast<UINT16>(configReader.GetInt(L"Network", L"Port", 7777));
+    UINT16 clientport = static_cast<UINT16>(configReader.GetInt(L"Port", L"Client", 14001));
+    UINT16 serverport = static_cast<UINT16>(configReader.GetInt(L"Port", L"GameServer", 15001));
 
     // 1. Winsock 초기화
     WSADATA wsaData;
@@ -33,6 +42,9 @@ int main()
         return new ClientSession();
         });
 
+	// 2-1. 패킷 핸들러 초기화
+    InitGateHandlers();
+
     // 3. IOCP Core 초기화
     IocpCore& iocp = IocpCore::GetInstance();
     if (!iocp.Initialize())
@@ -43,9 +55,10 @@ int main()
 
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
-    network.Init(port);
     // 5. Accept 시작
-    network.AcceptListener();
+    network.Init(clientport, []() {return new ClientSession();});
+    network.Init(serverport, []() {return new ServerSession();});
+
    
 
     LOG("GateServer 실행 시작");

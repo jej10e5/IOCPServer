@@ -12,7 +12,7 @@ void SessionManager::Init(std::function<Session* ()> fnCreate)
 }
 
 
-Session* SessionManager::GetEmptySession()
+Session* SessionManager::GetEmptySession(SessionFactory _factory)
 {
 	std::lock_guard<std::mutex> guard(m_SessionLock);
 
@@ -24,7 +24,7 @@ Session* SessionManager::GetEmptySession()
 	Session* pTempSession = m_SessionPool.top();
 	m_SessionPool.pop();
 
-	return pTempSession;
+	return _factory();
 }
 
 void SessionManager::Release(Session* _pSession)

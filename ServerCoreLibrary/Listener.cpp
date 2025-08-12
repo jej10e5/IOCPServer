@@ -4,8 +4,9 @@
 #include "SessionManager.h"
 #include "IocpContext.h"
 #include "IocpCore.h"
-bool Listener::Init(UINT16 _port)
+bool Listener::Init(UINT16 _port, SessionFactory _factory)
 {
+	m_Factory = _factory;
 	// 소켓 생성 및 초기화
 	// WSA_FLAG_OVERLAPPED 설정하지 않으면 AcceptEx(), WSARecv() 사용 불가
 	m_ListenSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -81,8 +82,9 @@ bool Listener::Init(UINT16 _port)
 
 bool Listener::PostAccept()
 {
+	Session* pSession = m_Factory();
 	SessionManager& sessionManager = SessionManager::GetInstance();
-	Session* pSession = sessionManager.GetEmptySession();
+	Session* pSession = sessionManager.GetEmptySession(m_Factory);
 	SOCKET clientSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	pSession->m_Socket = clientSocket;
 	

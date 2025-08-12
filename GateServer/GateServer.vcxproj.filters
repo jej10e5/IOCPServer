@@ -5,13 +5,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ClientSession">
+      <UniqueIdentifier>{69a7c087-1ace-4f85-b737-6a2cd35acaf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PacketHandler">
+      <UniqueIdentifier>{57990c00-35b4-4514-b9a9-522334be1788}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerSession">
+      <UniqueIdentifier>{7e161a47-7193-4fbf-9342-85ed863613d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerManager">
+      <UniqueIdentifier>{81c55f8f-ff77-4552-a38f-c07ec1319b16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ClientSession.cpp" />
-    <ClCompile Include="PacketHandlers.cpp" />
+    <ClCompile Include="ClientSession.cpp">
+      <Filter>ClientSession</Filter>
+    </ClCompile>
+    <ClCompile Include="GatePacketHandler.cpp">
+      <Filter>PacketHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerSession.cpp">
+      <Filter>ServerSession</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientSession.h" />
+    <ClInclude Include="ClientSession.h">
+      <Filter>ClientSession</Filter>
+    </ClInclude>
+    <ClInclude Include="GatePacketHandler.h">
+      <Filter>PacketHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSession.h">
+      <Filter>ServerSession</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerManager.h" />
   </ItemGroup>
 </Project>
