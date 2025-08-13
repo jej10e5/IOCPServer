@@ -18,8 +18,6 @@ void SessionManager::RegistFactory(SessionType _eType, SessionFactory _factory, 
 		{
 			m_SessionPool[_eType].push(m_Factories[_eType]());
 		}
-
-		m_SessionPool[_eType] = std::stack<Session*>();
 	}
 }
 
