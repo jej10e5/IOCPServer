@@ -4,9 +4,8 @@
 #include "SessionManager.h"
 #include "IocpContext.h"
 #include "IocpCore.h"
-bool Listener::Init(UINT16 _port, SessionFactory _factory)
+bool Listener::Init(UINT16 _port)
 {
-	m_Factory = _factory;
 	// 소켓 생성 및 초기화
 	// WSA_FLAG_OVERLAPPED 설정하지 않으면 AcceptEx(), WSARecv() 사용 불가
 	m_ListenSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -80,11 +79,10 @@ bool Listener::Init(UINT16 _port, SessionFactory _factory)
 
 }
 
-bool Listener::PostAccept()
+bool Listener::PostAccept(SessionType _eType)
 {
-	Session* pSession = m_Factory();
 	SessionManager& sessionManager = SessionManager::GetInstance();
-	Session* pSession = sessionManager.GetEmptySession(m_Factory);
+	Session* pSession = sessionManager.GetEmptySession(_eType);
 	SOCKET clientSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	pSession->m_Socket = clientSocket;
 	
@@ -115,7 +113,7 @@ bool Listener::PostAccept()
 		ERROR_LOG("AcceptEx 실패 : " << WSAGetLastError());
 		closesocket(clientSocket); // 소켓 닫고
 		SessionManager& sessionManager = SessionManager::GetInstance();
-		sessionManager.Release(pSession); // 세션 반환
+		sessionManager.Release(_eType, pSession); // 세션 반환
 		delete pContext;
 		return false;
 	}

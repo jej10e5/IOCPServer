@@ -37,9 +37,13 @@ int main()
         return -1;
     }
 
-    // 2. SessionManager에 ClientSession 생성 로직 주입
-    SessionManager::GetInstance().Init([]() {
+    // 2. SessionManager에 Session 생성 로직 주입
+    // 게이트에서는 클라이언트 세션과 서버 세션을 관리합니다.
+    SessionManager::GetInstance().RegistFactory(SessionType::Client,[]() {
         return new ClientSession();
+        });
+    SessionManager::GetInstance().RegistFactory(SessionType::Server, []() {
+        return new ServerSession();
         });
 
 	// 2-1. 패킷 핸들러 초기화
@@ -56,10 +60,8 @@ int main()
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
     // 5. Accept 시작
-    network.Init(clientport, []() {return new ClientSession();});
-    network.Init(serverport, []() {return new ServerSession();});
-
-   
+    network.Init(clientport);
+    network.Init(serverport);
 
     LOG("GateServer 실행 시작");
 
