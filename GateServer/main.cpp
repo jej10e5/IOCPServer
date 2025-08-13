@@ -60,8 +60,8 @@ int main()
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
     // 5. Accept 시작
-    network.Init(clientport);
-    network.Init(serverport);
+    network.Init(clientport, SessionType::Client);
+    network.Init(serverport, SessionType::Server);
 
     LOG("GateServer 실행 시작");
 

@@ -4,10 +4,11 @@
 #include "NetworkManager.h"
 #include "IocpCore.h"
 #include "PacketDispatcher.h"
-void Session::Init()
+void Session::Init(SessionType _eType)
 {
 	m_RecvBuffer.Clear();
 	m_Socket = INVALID_SOCKET;
+	m_eSessionType = _eType;
 }
 bool Session::Recv()
 {
@@ -136,7 +137,7 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 		ERROR_LOG("setsockopt  SO_UPDATE_ACCEPT_CONTEXT  실패 : " << WSAGetLastError());
 
 		closesocket(m_Socket);
-		sessionManager.Release(this);
+		sessionManager.Release(m_eSessionType, this);
 		delete _pContext;
 		return;
 	}
@@ -146,7 +147,7 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 	{
 		ERROR_LOG("소켓 IOCP 등록 실패");
 		closesocket(m_Socket);
-		sessionManager.Release(this);
+		sessionManager.Release(m_eSessionType, this);
 		delete _pContext;
 		return;
 	}
@@ -160,7 +161,7 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 	{
 		ERROR_LOG("WSARecv 실패");
 	}
-	networkManager.AcceptListener();
+	networkManager.AcceptListener(m_eSessionType);
 }
 
 void Session::Disconnect()
@@ -174,7 +175,7 @@ void Session::Disconnect()
 
 	// 3. 세션 정리 (메모리 삭제 or 풀에 반납)
 	SessionManager& sessionManager = SessionManager::GetInstance();
-	sessionManager.Release(this);
+	sessionManager.Release(m_eSessionType, this);
 
 }
 

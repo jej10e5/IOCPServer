@@ -9,9 +9,9 @@ class NetworkManager:public Singleton<NetworkManager>
 public:
 	using SessionFactory = std::function<Session* ()>;
 
-	void Init(UINT16 _uiPort);
+	void Init(UINT16 _uiPort, SessionType _eType);
 	SOCKET GetListenerSocket();
-	void AcceptListener();
+	void AcceptListener(SessionType _eType);
 private:
 	Listener m_Listener;
 };
