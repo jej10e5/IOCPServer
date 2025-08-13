@@ -2,6 +2,11 @@
 #include "pch.h"
 #include <functional>
 class  Session;
+enum class SessionType
+{
+	Client,
+	Server,
+};
 class SessionManager:public Singleton<SessionManager>
 {
 	friend class Singleton<SessionManager>;
@@ -9,14 +14,14 @@ class SessionManager:public Singleton<SessionManager>
 public:
 	typedef std::function<Session* ()> SessionFactory;
 
-	void Init(std::function<Session*()> fnCreate);
+	void RegistFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize = 1);
 	
-	Session* GetEmptySession(SessionFactory _factory);
-	void Release(Session* _pSession);
+	Session* GetEmptySession(SessionType _eType);
+	void Release(SessionType _eType, Session* _pSession);
 
 private:
-	std::stack<Session*> m_SessionPool;
+	std::unordered_map<SessionType, std::stack<Session*>> m_SessionPool;
+	std::unordered_map<SessionType, SessionFactory> m_Factories;
 	std::mutex m_SessionLock;
-	std::function<Session* ()> m_fnCreateSession; // 技记 积己 窃荐
 };
 

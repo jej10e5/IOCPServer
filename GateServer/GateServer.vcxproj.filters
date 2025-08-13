@@ -29,7 +29,9 @@
     <ClCompile Include="ServerSession.cpp">
       <Filter>ServerSession</Filter>
     </ClCompile>
-    <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="ServerManager.cpp">
+      <Filter>ServerManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientSession.h">
@@ -41,6 +43,8 @@
     <ClInclude Include="ServerSession.h">
       <Filter>ServerSession</Filter>
     </ClInclude>
-    <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="ServerManager.h">
+      <Filter>ServerManager</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
