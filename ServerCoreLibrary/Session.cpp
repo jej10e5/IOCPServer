@@ -4,6 +4,7 @@
 #include "NetworkManager.h"
 #include "IocpCore.h"
 #include "PacketDispatcher.h"
+#include "SessionManager.h"
 void Session::Init(SessionType _eType)
 {
 	m_RecvBuffer.Clear();
@@ -126,7 +127,7 @@ void Session::OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen)
 void Session::OnAcceptCompleted(IocpContext* _pContext)
 {
 	NetworkManager& networkManager = NetworkManager::GetInstance();
-	SOCKET listenSock = networkManager.GetListenerSocket();
+	SOCKET listenSock = m_Socket;
 	// SO_UPDATE_ACCEPT_CONTEXT 설정하는 이유
 	//  - 커널에게 이 소켓은 이 리슨 소켓을 통해 accept된거라고 알려주는 역할
 	//  - 그래야 커널이 해당 소켓 리소스를 정리할 타이밍을 제대로 계산

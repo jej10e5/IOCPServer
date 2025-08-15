@@ -2,6 +2,8 @@
 #include "pch.h"
 #include "Listener.h"
 #include <functional>
+#include "ConfigReader.h"
+#include "SessionType.h"
 class Session;
 class NetworkManager:public Singleton<NetworkManager>
 {
@@ -10,8 +12,16 @@ public:
 	using SessionFactory = std::function<Session* ()>;
 
 	void Init(UINT16 _uiPort, SessionType _eType);
-	SOCKET GetListenerSocket();
 	void AcceptListener(SessionType _eType);
+
+	void InitFromConfig();
+
 private:
-	Listener m_Listener;
+	struct ListnerInfo
+	{
+		Listener listener;
+		SessionType sessionType;
+	};
+
+	vector<ListnerInfo> m_Listeners;
 };

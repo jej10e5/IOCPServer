@@ -7,10 +7,8 @@
     <ClInclude Include="PacketID.h" />
     <ClInclude Include="PacketStruct.h" />
     <ClInclude Include="Singleton.h" />
-    <ClInclude Include="ConfigReader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="ConfigReader.cpp" />
   </ItemGroup>
 </Project>

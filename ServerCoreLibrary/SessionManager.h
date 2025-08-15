@@ -1,12 +1,9 @@
 #pragma once
 #include "pch.h"
 #include <functional>
-class  Session;
-enum class SessionType
-{
-	Client,
-	Server,
-};
+#include "../ServerCommon/Singleton.h"
+#include "SessionType.h"
+class Session;
 class SessionManager:public Singleton<SessionManager>
 {
 	friend class Singleton<SessionManager>;
@@ -18,6 +15,8 @@ public:
 	
 	Session* GetEmptySession(SessionType _eType);
 	void Release(SessionType _eType, Session* _pSession);
+
+	SessionType StringToSessionType(const std::wstring& typeStr);
 
 private:
 	std::unordered_map<SessionType, std::stack<Session*>> m_SessionPool;

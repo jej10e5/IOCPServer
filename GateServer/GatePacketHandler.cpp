@@ -1,20 +1,20 @@
 #include "GatePacketHandler.h"
 #include "ClientSession.h"
+#include "ServerSession.h"
 
 void GatePacketHandler::SendToGame(Session* _pSession, PacketHeader* _pHeader)
 {
-	ClientSession* pClientSession = dynamic_cast<ClientSession*>(_pSession);
-	if (!pClientSession)
+	ServerSession* pServerSession = dynamic_cast<ServerSession*>(_pSession);
+	if (!pServerSession)
 	{
-		ERROR_LOG("세션이 ClientSession으로 캐스팅되지 않습니다.");
+		ERROR_LOG("세션이 ServerSession으로 캐스팅되지 않습니다.");
 		return;
 	}
 
-	ServerSession* pGameServer = pClientSession->GetGameServer();
-	if (pGameServer)
+	if (pServerSession)
 	{
 		// 게임 서버로 패킷 전송
-		pGameServer->SendPacket(reinterpret_cast<const char*>(_pHeader), _pHeader->size);
+		pServerSession->SendPacket(reinterpret_cast<const char*>(_pHeader), _pHeader->size);
 	}
 	else
 	{

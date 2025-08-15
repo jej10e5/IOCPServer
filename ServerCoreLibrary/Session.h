@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "SessionManager.h"
 #include "RingBuffer.h"
+#include "SessionType.h"
 
 struct IocpContext;
 struct SendBuffer
@@ -14,15 +14,6 @@ struct SendBuffer
 
 };
 
-enum class SessionType
-{
-	CLIENT, // 클라이언트 세션
-	GATE,  // 게이트 세션
-	LOGIN, // 로그인 세션
-	GAME,  // 게임 세션
-};	
-
-
 class Session
 {
 public:
@@ -30,13 +21,14 @@ public:
 	{
 		Init();
 	}
-	void Init(SessionType _eType = SessionType::Client);
+	void Init(SessionType _eType = SessionType::CLIENT);
 	bool Recv();
 	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐
 	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
 	void OnAcceptCompleted(IocpContext* _pContext);
 	void Disconnect();
+	void SetListenSocket(SOCKET _socket) { m_Socket = _socket; }
 
 	// 패킷 구현부
 	void SendPacket(const char* _pData, INT32 _i32Len) ;

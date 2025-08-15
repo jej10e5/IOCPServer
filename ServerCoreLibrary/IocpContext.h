@@ -1,6 +1,6 @@
 #pragma once
 #include "pch.h"
-#include "Session.h"
+class Session;
 
 // 이벤트의 용도 구분하기 위함
 enum class IocpOperation

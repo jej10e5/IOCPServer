@@ -2,8 +2,7 @@
 #include "../ServerCommon/pch.h"
 #include "PacketDispatcher.h"
 #include "PacketID.h"
-#include "Session.h"
-
+class Session;
 class GatePacketHandler
 {
 public:

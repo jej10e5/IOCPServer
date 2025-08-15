@@ -6,7 +6,7 @@ class ServerSession : public Session
 public:
 	ServerSession()
 	{
-		Init(SessionType::Server);
+		Init(SessionType::GAME);
 	};
 
 	void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) override;

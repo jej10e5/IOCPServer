@@ -1,11 +1,10 @@
 #include "../ServerCommon/pch.h"
-#include "../ServerCommon/ConfigReader.h"
-#include "IocpCore.h"
-#include "GatePacketHandler.h"
-#include "SessionManager.h"
 #include "NetworkManager.h"
+#include "SessionManager.h"
 #include "ClientSession.h"
 #include "ServerSession.h"
+#include "GatePacketHandler.h"
+#include "IocpCore.h"
 #include <filesystem>
 
 static std::wstring GetExeDir()
@@ -25,9 +24,8 @@ int main()
 {
 
     std::wstring iniPath = GetExeDir() + L"\\Server.ini";
-    ConfigReader configReader(iniPath.c_str());   // ← 이걸로!
-    UINT16 clientport = static_cast<UINT16>(configReader.GetInt(L"Port", L"Client", 14001));
-    UINT16 serverport = static_cast<UINT16>(configReader.GetInt(L"Port", L"GameServer", 15001));
+	//ConfigReader::GetInstance().LoadConfig(iniPath.c_str());
+   
 
     // 1. Winsock 초기화
     WSADATA wsaData;
@@ -37,12 +35,12 @@ int main()
         return -1;
     }
 
-    // 2. SessionManager에 Session 생성 로직 주입
-    // 게이트에서는 클라이언트 세션과 서버 세션을 관리합니다.
-    SessionManager::GetInstance().RegistFactory(SessionType::Client,[]() {
+     //2. SessionManager에 Session 생성 로직 주입
+     //게이트에서는 클라이언트 세션과 서버 세션을 관리합니다.
+    SessionManager::GetInstance().RegistFactory(SessionType::CLIENT,[]() {
         return new ClientSession();
         });
-    SessionManager::GetInstance().RegistFactory(SessionType::Server, []() {
+    SessionManager::GetInstance().RegistFactory(SessionType::GAME, []() {
         return new ServerSession();
         });
 
@@ -60,8 +58,7 @@ int main()
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
     // 5. Accept 시작
-    network.Init(clientport, SessionType::Client);
-    network.Init(serverport, SessionType::Server);
+	network.InitFromConfig();
 
     LOG("GateServer 실행 시작");
 

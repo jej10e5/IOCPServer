@@ -23,6 +23,9 @@
     <ClCompile Include="IocpCore.cpp">
       <Filter>IocpCore</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigReader.cpp">
+      <Filter>ConfingReader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -50,6 +53,12 @@
     <ClInclude Include="IocpContext.h">
       <Filter>IocpCore</Filter>
     </ClInclude>
+    <ClInclude Include="ConfigReader.h">
+      <Filter>ConfingReader</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionType.h">
+      <Filter>Session</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Session">
@@ -72,6 +81,9 @@
     </Filter>
     <Filter Include="IocpCore">
       <UniqueIdentifier>{503b8fd8-e10d-4dd4-9241-f3a6ed8a43da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ConfingReader">
+      <UniqueIdentifier>{e127a917-df2a-4a74-83c5-f07a0b729ecb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

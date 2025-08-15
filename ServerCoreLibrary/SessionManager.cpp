@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "SessionManager.h"
 #include "Session.h"
-class Session;
 
 void SessionManager::RegistFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize)
 {
@@ -47,4 +46,14 @@ void SessionManager::Release(SessionType _eType, Session* _pSession)
 
 	_pSession->Init();
 	m_SessionPool[_eType].push(_pSession);
+}
+
+SessionType SessionManager::StringToSessionType(const std::wstring& typeStr)
+{
+	if (typeStr == L"Client")
+		return SessionType::CLIENT;
+	else if(typeStr == L"Game")
+		return SessionType::GAME;
+
+	return SessionType::NONE; // 기본값으로 Client 반환
 }

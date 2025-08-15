@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "SessionType.h"
 #include "Session.h"
 #include <functional>
 class Listener
