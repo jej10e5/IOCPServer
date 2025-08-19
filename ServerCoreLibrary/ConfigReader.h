@@ -5,7 +5,8 @@
 class ConfigReader : public Singleton<ConfigReader>
 {
 public:
-	bool LoadConfig(const std::wstring& _iniFilePath);
+	ConfigReader() { LoadConfig(); };
+	bool LoadConfig();
 
 	INT32 GetInt(const std::wstring& _section, const std::wstring& _key, INT32 _defaultValue = 0);
 	std::wstring GetString(const std::wstring& _section, const std::wstring& _key, const std::wstring& _defaultValue = L"");

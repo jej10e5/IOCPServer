@@ -1,10 +1,13 @@
 #include "pch.h"
 #include "ConfigReader.h"
+#include <filesystem>
 
 
-bool ConfigReader::LoadConfig(const std::wstring& _iniFilePath)
+bool ConfigReader::LoadConfig()
 {
-	m_IniFilePath = _iniFilePath;
+    wchar_t buf[MAX_PATH];
+    DWORD n = ::GetModuleFileNameW(nullptr, buf, MAX_PATH);
+	m_IniFilePath = std::filesystem::path(buf, buf + n).parent_path().wstring() + L"\\Server.ini";
 	ParsePorts();
 	return true;
 }

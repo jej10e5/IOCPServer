@@ -7,12 +7,6 @@
 #include "IocpCore.h"
 #include <filesystem>
 
-static std::wstring GetExeDir()
-{
-    wchar_t buf[MAX_PATH];
-    DWORD n = ::GetModuleFileNameW(nullptr, buf, MAX_PATH);
-    return std::filesystem::path(buf, buf + n).parent_path().wstring();
-}
 
 void InitGateHandlers()
 {
@@ -22,10 +16,6 @@ void InitGateHandlers()
 
 int main()
 {
-
-    std::wstring iniPath = GetExeDir() + L"\\Server.ini";
-	//ConfigReader::GetInstance().LoadConfig(iniPath.c_str());
-   
 
     // 1. Winsock √ ±‚»≠
     WSADATA wsaData;

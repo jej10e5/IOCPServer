@@ -63,7 +63,15 @@ int main()
 		std::cerr << "recv ½ÇÆĞ: " << WSAGetLastError() << std::endl;
 	}
 
+	while (true)
+	{
+		Sleep(1000);
+	}
+
+
 	closesocket(sock);
 	WSACleanup();
+
+
 	return 0;
 }

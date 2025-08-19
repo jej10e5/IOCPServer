@@ -5,7 +5,7 @@ class ClientSession : public Session
 public:
 	ClientSession()
 	{
-		Init();
+		Init(SessionType::CLIENT);
 	};
 
 	void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) override;

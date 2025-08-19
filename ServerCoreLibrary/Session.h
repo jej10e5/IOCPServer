@@ -19,9 +19,9 @@ class Session
 public:
 	Session() : m_RecvBuffer(MAX_RECV_BUFFER_SIZE)
 	{
-		Init();
+		Init(SessionType::NONE);
 	}
-	void Init(SessionType _eType = SessionType::CLIENT);
+	void Init(SessionType _eType);
 	bool Recv();
 	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐
 	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
