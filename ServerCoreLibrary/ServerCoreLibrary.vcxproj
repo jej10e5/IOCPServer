@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="ConfigReader.cpp" />
     <ClCompile Include="IocpCore.cpp" />
     <ClCompile Include="Listener.cpp" />
@@ -26,10 +27,13 @@
     <ClCompile Include="PacketDispatcher.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="ServerSession.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ClientSession.h" />
     <ClInclude Include="ConfigReader.h" />
     <ClInclude Include="IocpContext.h" />
     <ClInclude Include="IocpCore.h" />
@@ -38,6 +42,8 @@
     <ClInclude Include="PacketDispatcher.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="ServerSession.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="SessionType.h" />

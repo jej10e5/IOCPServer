@@ -26,6 +26,9 @@
     <ClCompile Include="ConfigReader.cpp">
       <Filter>etc</Filter>
     </ClCompile>
+    <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="ClientSession.cpp" />
+    <ClCompile Include="ServerSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -59,6 +62,9 @@
     <ClInclude Include="ConfigReader.h">
       <Filter>etc</Filter>
     </ClInclude>
+    <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="ClientSession.h" />
+    <ClInclude Include="ServerSession.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Net">

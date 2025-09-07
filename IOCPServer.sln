@@ -9,7 +9,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestClient", "TestClient\Te
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerCoreLibrary", "ServerCoreLibrary\ServerCoreLibrary.vcxproj", "{DACFFB8F-CAA5-4D9E-80C7-6EAED46457F0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "GateServer\GateServer.vcxproj", "{25C819EB-4646-4339-BC7F-2348D1B9E69A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GateServer", "GateServer\GateServer.vcxproj", "{25C819EB-4646-4339-BC7F-2348D1B9E69A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameServer", "GameServer\GameServer.vcxproj", "{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,14 @@ Global
 		{25C819EB-4646-4339-BC7F-2348D1B9E69A}.Release|x64.Build.0 = Release|x64
 		{25C819EB-4646-4339-BC7F-2348D1B9E69A}.Release|x86.ActiveCfg = Release|Win32
 		{25C819EB-4646-4339-BC7F-2348D1B9E69A}.Release|x86.Build.0 = Release|Win32
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Debug|x64.ActiveCfg = Debug|x64
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Debug|x64.Build.0 = Debug|x64
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Debug|x86.ActiveCfg = Debug|Win32
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Debug|x86.Build.0 = Debug|Win32
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Release|x64.ActiveCfg = Release|x64
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Release|x64.Build.0 = Release|x64
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Release|x86.ActiveCfg = Release|Win32
+		{D5E9C200-A6C1-4632-B159-4A3F0E0AE8CE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ void NetworkManager::Init(UINT16 _uiPort, SessionType _eType)
 	ListnerInfo info;
 	if (!info.listener.Init(_uiPort))
     {
-		ERROR_LOG("Failed to initialize listener on port: ", _uiPort);
+		ERROR_LOG("Failed to initialize listener on port: " + _uiPort);
 		return;
 	}
 

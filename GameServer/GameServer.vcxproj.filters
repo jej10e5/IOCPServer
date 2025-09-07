@@ -10,10 +10,12 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="GamePacketHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="GamePacketHandler.h" />
   </ItemGroup>
 </Project>
