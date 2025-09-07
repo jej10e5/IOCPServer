@@ -30,9 +30,6 @@ int main()
         return new ClientSession();
         });
 
-    SessionManager::GetInstance().RegisterFactory(SessionType::GAMEDB, []() {
-        return new ServerSession();
-        });
 
     // 3. 패킷 핸들러 초기화
     InitGateHandlers();

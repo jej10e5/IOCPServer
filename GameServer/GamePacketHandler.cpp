@@ -1,7 +1,7 @@
 #include "GamePacketHandler.h"
 #include "ClientSession.h"
 #include "ServerSession.h"
-
+#include "SessionManager.h"
 
 void GamePacketHandler::Handle_Eco(Session* _pSession, const char* _pData, UINT16 _ui16size)
 {

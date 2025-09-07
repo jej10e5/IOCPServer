@@ -125,7 +125,6 @@ bool Listener::PostAccept(SessionType _eType)
 		return false;
 	}
 
-	LOG("서버 리슨 시작");
 	return true;
 
 }

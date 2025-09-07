@@ -11,11 +11,13 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GamePacketHandler.cpp" />
+    <ClCompile Include="CommandManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="GamePacketHandler.h" />
+    <ClInclude Include="CommandManager.h" />
   </ItemGroup>
 </Project>

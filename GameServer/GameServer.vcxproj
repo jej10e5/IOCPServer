@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandManager.h" />
     <ClInclude Include="GamePacketHandler.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CommandManager.cpp" />
     <ClCompile Include="GamePacketHandler.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />

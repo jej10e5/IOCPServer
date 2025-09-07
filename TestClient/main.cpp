@@ -35,7 +35,7 @@ int main()
 
 	// Echo 패킷 구성
 	CP_ECHO pkt;
-	strcpy_s(pkt._msg, "Hello from TestClient");
+	strcpy_s(pkt._msg, "Hello from TestClient2");
 
 	int len = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
 	if (len == SOCKET_ERROR)

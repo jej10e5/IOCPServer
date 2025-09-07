@@ -4,22 +4,29 @@
 #include "SessionManager.h"
 void NetworkManager::Init(UINT16 _uiPort, SessionType _eType)
 {
-	ListnerInfo info;
-	if (!info.listener.Init(_uiPort))
+    ListnerInfo info;
+    info.sessionType = _eType;
+
+    if (!info.listener.Init(_uiPort))
     {
-		ERROR_LOG("Failed to initialize listener on port: " + _uiPort);
-		return;
-	}
+        ERROR_LOG("Failed to initialize listener on port: " << _uiPort);
+        return;
+    }
 
-	info.sessionType = _eType;  
-	info.listener.PostAccept(_eType);
+    // 리스너는 한 번만 벡터에 넣는다
+    m_Listeners.push_back(std::move(info));
 
-	m_Listeners.push_back(std::move(info));
-    //auto& listener = m_Listeners.back().listener;
-    //constexpr int ACCEPT_BACKLOG = 64;
-    //for (int i = 0;i < ACCEPT_BACKLOG;i++)
-    //    listener.PostAccept(_eType);
+    // push_back 이후에 back()으로 참조를 잡는다
+    auto& listener = m_Listeners.back().listener;
 
+    // 같은 리스너에 대해 Accept를 여러 개 선게시
+    constexpr int ACCEPT_BACKLOG = 64; // 필요시 128~256까지 늘려도 OK
+    for (int i = 0; i < ACCEPT_BACKLOG; ++i)
+    {
+        listener.PostAccept(_eType);
+    }
+
+    LOG("Listen started on port " << _uiPort << ", pre-posted accepts = " << ACCEPT_BACKLOG);
 
 }
 

@@ -11,6 +11,7 @@ void Session::Init(SessionType _eType)
 	m_AcceptSocket = INVALID_SOCKET;
 	m_ListenSocket = INVALID_SOCKET;
 	m_eSessionType = _eType;
+	m_ui64Token = 0;
 }
 bool Session::Recv()
 {
@@ -166,11 +167,10 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 		sessionManager.Release(m_eSessionType, this);
 		return;
 	}
-	LOG("클라이언트 접속 완료");
 
-	//SendPacket("Hello1", 6);
-	//SendPacket("Hello2", 6);
-	//SendPacket("Hello3", 6);
+	m_ui64Token = sessionManager.RegisterActive(this);
+	LOG("클라이언트 접속 완료 (token = " << m_ui64Token << ")");
+
 
 	if (!Recv())
 	{
@@ -190,6 +190,7 @@ void Session::Disconnect()
 
 	// 3. 세션 정리 (메모리 삭제 or 풀에 반납)
 	SessionManager& sessionManager = SessionManager::GetInstance();
+	sessionManager.UnregisterActive(this);
 	sessionManager.Release(m_eSessionType, this);
 
 }

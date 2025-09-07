@@ -17,12 +17,14 @@ public:
 	void Init(SessionType _eType);
 	bool Recv();
 	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐
-	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
+	virtual void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) = 0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
 	void OnAcceptCompleted(IocpContext* _pContext);
 	void Disconnect();
 	void SetAcceptedSocket(SOCKET _socket) { m_AcceptSocket = _socket; }
 	void SetListenerSocket(SOCKET _socket) { m_ListenSocket = _socket; }
+
+	UINT64 GetToken() const { return m_ui64Token; }
 
 	// 패킷 구현부
 	void SendPacket(const char* _pData, INT32 _i32Len) ;
@@ -46,6 +48,8 @@ private:
 	std::queue<SendItem> m_SendQueue; // 전송 대기열
 	std::mutex m_SendLock;
 	bool m_bIsSending = false; // 현재 전송 중 여부
+
+	UINT64 m_ui64Token = 0; // 활성 토큰
 };
 
 

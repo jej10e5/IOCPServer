@@ -58,3 +58,31 @@ SessionType SessionManager::StringToSessionType(const std::wstring& typeStr)
 		return SessionType::GAMEDB;
 	return SessionType::NONE; // 기본값으로 Client 반환
 }
+
+UINT64 SessionManager::RegisterActive(Session* _pSession)
+{
+	const UINT64 t = m_ui64NextToken.fetch_add(1, std::memory_order_relaxed);
+	std::lock_guard<std::mutex> g(m_SessionLock);
+	m_ActiveSessios[t] = _pSession;
+	return t;
+}
+
+void SessionManager::UnregisterActive(Session* _pSession)
+{
+	std::lock_guard<std::mutex> g(m_ActiveLock);
+	for (auto iter = m_ActiveSessios.begin(); iter != m_ActiveSessios.end();iter++)
+	{
+		if (iter->second == _pSession)
+		{
+			m_ActiveSessios.erase(iter);
+			break;
+		}
+	}
+}
+
+Session* SessionManager::FinByToken(UINT64 _ui64Token)
+{
+	std::lock_guard<std::mutex> g(m_ActiveLock);
+	auto iter = m_ActiveSessios.find(_ui64Token);
+	return (iter == m_ActiveSessios.end()) ? nullptr : iter->second;
+}
