@@ -34,7 +34,7 @@ int main()
 	}
 
 	// Echo 패킷 구성
-	PACKET_MSG_ECHO pkt;
+	CP_ECHO pkt;
 	strcpy_s(pkt._msg, "Hello from TestClient");
 
 	int len = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
@@ -51,7 +51,7 @@ int main()
 	int recvLen = recv(sock, recvBuf, sizeof(recvBuf), 0);
 	if (recvLen > 0)
 	{
-		const PACKET_MSG_ECHO* pEcho = reinterpret_cast<const PACKET_MSG_ECHO*>(recvBuf);
+		const CP_ECHO* pEcho = reinterpret_cast<const CP_ECHO*>(recvBuf);
 		std::cout << "서버 응답: " << pEcho->_msg << std::endl;
 	}
 	else if (recvLen == 0)

@@ -10,3 +10,9 @@ enum PacketID : UINT16
     CM_LOGIN,
     SM_LOGIN,
 };
+
+enum DBPacketID : UINT16
+{
+    DCM_ECHO = 1,
+    DSM_ECHO
+};

@@ -8,16 +8,10 @@
     <ClCompile Include="Listener.cpp">
       <Filter>Net</Filter>
     </ClCompile>
-    <ClCompile Include="Session.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
     <ClCompile Include="RingBuffer.cpp">
       <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="PacketDispatcher.cpp">
-      <Filter>Net</Filter>
-    </ClCompile>
-    <ClCompile Include="SessionManager.cpp">
       <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="NetworkManager.cpp">
@@ -27,8 +21,18 @@
       <Filter>etc</Filter>
     </ClCompile>
     <ClCompile Include="ServerManager.cpp" />
-    <ClCompile Include="ClientSession.cpp" />
-    <ClCompile Include="ServerSession.cpp" />
+    <ClCompile Include="ClientSession.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerSession.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManager.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -41,30 +45,34 @@
     <ClInclude Include="Listener.h">
       <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="Session.h">
-      <Filter>Net</Filter>
-    </ClInclude>
     <ClInclude Include="RingBuffer.h">
       <Filter>Net</Filter>
     </ClInclude>
     <ClInclude Include="PacketDispatcher.h">
       <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="SessionManager.h">
-      <Filter>Net</Filter>
-    </ClInclude>
     <ClInclude Include="NetworkManager.h">
-      <Filter>Net</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionType.h">
       <Filter>Net</Filter>
     </ClInclude>
     <ClInclude Include="ConfigReader.h">
       <Filter>etc</Filter>
     </ClInclude>
     <ClInclude Include="ServerManager.h" />
-    <ClInclude Include="ClientSession.h" />
-    <ClInclude Include="ServerSession.h" />
+    <ClInclude Include="ClientSession.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSession.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManager.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionType.h">
+      <Filter>Session</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Net">
@@ -72,6 +80,9 @@
     </Filter>
     <Filter Include="etc">
       <UniqueIdentifier>{7c28fee1-7cda-4e41-b360-f53488788ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{7b7e0cc2-3911-4a37-8555-f4112058cdf1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

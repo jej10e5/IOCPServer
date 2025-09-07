@@ -5,6 +5,7 @@
 #include "ConfigReader.h"
 #include "SessionType.h"
 class Session;
+class ServerSession;
 class NetworkManager:public Singleton<NetworkManager>
 {
 	friend class Singleton<NetworkManager>;
@@ -15,6 +16,8 @@ public:
 	void AcceptListener(SessionType _eType);
 
 	void InitFromConfig();
+
+	
 
 private:
 	struct ListnerInfo

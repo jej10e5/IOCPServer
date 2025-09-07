@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "NetworkManager.h"
 #include "Session.h"
+#include "SessionManager.h"
 void NetworkManager::Init(UINT16 _uiPort, SessionType _eType)
 {
 	ListnerInfo info;
@@ -50,3 +51,4 @@ void NetworkManager::InitFromConfig()
     //    Init(static_cast<UINT16>(port), SessionType::LOGIN);
 
 }
+

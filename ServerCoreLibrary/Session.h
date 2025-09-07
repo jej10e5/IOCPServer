@@ -13,6 +13,7 @@ public:
 	{
 		Init(SessionType::NONE);
 	}
+	SessionType GetType() const { return m_eSessionType; }
 	void Init(SessionType _eType);
 	bool Recv();
 	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐

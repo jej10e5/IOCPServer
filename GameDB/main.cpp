@@ -3,15 +3,13 @@
 #include "ClientSession.h"
 #include "ServerSession.h"
 #include "IocpCore.h"
-#include "GamePacketHandler.h"
+#include "GameDBPacketHandler.h"
 
 
 void InitGateHandlers()
 {
     // 패킷 핸들러 등록
-    REGISTER_HANDLER(CM_ECHO, GamePacketHandler::Handle_Eco);
-    REGISTER_HANDLER(DSM_ECHO, GamePacketHandler::Handle_DBEco);
-    REGISTER_HANDLER(CM_CHAT, GamePacketHandler::Handle_Chat);
+    REGISTER_HANDLER(DCM_ECHO, GameDBPacketHandler::Handle_Eco);
 }
 
 int main()
@@ -25,12 +23,9 @@ int main()
     }
 
     //2. SessionManager에 Session 생성 로직 주입
-    //게이트에서는 클라이언트 세션과 서버 세션을 관리
-    SessionManager::GetInstance().RegisterFactory(SessionType::CLIENT, []() {
-        return new ClientSession();
-        });
+    //게임 디비에서는 게임 세션 관리
 
-    SessionManager::GetInstance().RegisterFactory(SessionType::GAMEDB, []() {
+    SessionManager::GetInstance().RegisterFactory(SessionType::GAME, []() {
         return new ServerSession();
         });
 
