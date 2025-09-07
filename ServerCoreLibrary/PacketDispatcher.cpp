@@ -13,6 +13,7 @@ void PacketDispatcher::Register(UINT16 _ui16PacketId, HandlerFunc _handler)
     }
 
     m_HandlerList.insert(make_pair(_ui16PacketId, _handler));
+
 }
 
 void PacketDispatcher::Dispatch(Session* _pSession, const char* _pData, UINT16 _ui16Size)

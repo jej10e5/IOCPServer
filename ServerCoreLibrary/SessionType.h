@@ -7,5 +7,6 @@ enum class SessionType
 	GATE,  // 게이트 세션
 	LOGIN, // 로그인 세션
 	GAME,  // 게임 세션
+	GAMEDB,  // 게임db 세션
 };
 

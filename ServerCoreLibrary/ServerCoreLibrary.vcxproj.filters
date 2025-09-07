@@ -2,88 +2,70 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Session.cpp">
-      <Filter>Session</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkManager.cpp">
-      <Filter>NetworkManager</Filter>
-    </ClCompile>
-    <ClCompile Include="RingBuffer.cpp">
-      <Filter>RingBuffer</Filter>
+    <ClCompile Include="IocpCore.cpp">
+      <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="Listener.cpp">
-      <Filter>Listener</Filter>
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="PacketDispatcher.cpp">
-      <Filter>PacketDispatcher</Filter>
+      <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="SessionManager.cpp">
-      <Filter>SessionManager</Filter>
+      <Filter>Net</Filter>
     </ClCompile>
-    <ClCompile Include="IocpCore.cpp">
-      <Filter>IocpCore</Filter>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>Net</Filter>
     </ClCompile>
     <ClCompile Include="ConfigReader.cpp">
-      <Filter>ConfingReader</Filter>
+      <Filter>etc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Session.h">
-      <Filter>Session</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkManager.h">
-      <Filter>NetworkManager</Filter>
-    </ClInclude>
-    <ClInclude Include="RingBuffer.h">
-      <Filter>RingBuffer</Filter>
-    </ClInclude>
-    <ClInclude Include="Listener.h">
-      <Filter>Listener</Filter>
-    </ClInclude>
-    <ClInclude Include="PacketDispatcher.h">
-      <Filter>PacketDispatcher</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionManager.h">
-      <Filter>SessionManager</Filter>
+    <ClInclude Include="IocpContext.h">
+      <Filter>Net</Filter>
     </ClInclude>
     <ClInclude Include="IocpCore.h">
-      <Filter>IocpCore</Filter>
+      <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="IocpContext.h">
-      <Filter>IocpCore</Filter>
+    <ClInclude Include="Listener.h">
+      <Filter>Net</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigReader.h">
-      <Filter>ConfingReader</Filter>
+    <ClInclude Include="Session.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketDispatcher.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManager.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>Net</Filter>
     </ClInclude>
     <ClInclude Include="SessionType.h">
-      <Filter>Session</Filter>
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigReader.h">
+      <Filter>etc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Session">
-      <UniqueIdentifier>{a889542d-3b32-47e1-a500-f9830c2d816e}</UniqueIdentifier>
+    <Filter Include="Net">
+      <UniqueIdentifier>{8ac4813b-34f3-4f1d-a0ac-8521cf73ac53}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NetworkManager">
-      <UniqueIdentifier>{884e576f-50ab-49e6-bc98-162f6e082417}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="RingBuffer">
-      <UniqueIdentifier>{a02f9735-a7cb-4731-ab1b-0320a4e4f692}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Listener">
-      <UniqueIdentifier>{2c8b1234-a92f-4b99-9ef2-de4b230d5c34}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PacketDispatcher">
-      <UniqueIdentifier>{9435a9a0-3f01-4556-a44b-a4c948a0304d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SessionManager">
-      <UniqueIdentifier>{3ba8eb39-bb82-41fa-92ad-08187b4a7898}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="IocpCore">
-      <UniqueIdentifier>{503b8fd8-e10d-4dd4-9241-f3a6ed8a43da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ConfingReader">
-      <UniqueIdentifier>{e127a917-df2a-4a74-83c5-f07a0b729ecb}</UniqueIdentifier>
+    <Filter Include="etc">
+      <UniqueIdentifier>{7c28fee1-7cda-4e41-b360-f53488788ee9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

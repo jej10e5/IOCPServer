@@ -11,7 +11,7 @@ class SessionManager:public Singleton<SessionManager>
 public:
 	typedef std::function<Session* ()> SessionFactory;
 
-	void RegistFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize = 1);
+	void RegisterFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize = 1);
 	
 	Session* GetEmptySession(SessionType _eType);
 	void Release(SessionType _eType, Session* _pSession);

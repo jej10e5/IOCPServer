@@ -5,8 +5,6 @@
 #include "ServerSession.h"
 #include "GatePacketHandler.h"
 #include "IocpCore.h"
-#include <filesystem>
-
 
 void InitGateHandlers()
 {
@@ -16,28 +14,7 @@ void InitGateHandlers()
 
 int main()
 {
-
-    // 1. Winsock 초기화
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-    {
-        ERROR_LOG("WSAStartup 실패");
-        return -1;
-    }
-
-     //2. SessionManager에 Session 생성 로직 주입
-     //게이트에서는 클라이언트 세션과 서버 세션을 관리합니다.
-    SessionManager::GetInstance().RegistFactory(SessionType::CLIENT,[]() {
-        return new ClientSession();
-        });
-    SessionManager::GetInstance().RegistFactory(SessionType::GAME, []() {
-        return new ServerSession();
-        });
-
-	// 2-1. 패킷 핸들러 초기화
-    InitGateHandlers();
-
-    // 3. IOCP Core 초기화
+    // 1. IOCP Core 초기화
     IocpCore& iocp = IocpCore::GetInstance();
     if (!iocp.Initialize())
     {
@@ -45,26 +22,38 @@ int main()
         return -1;
     }
 
+     //2. SessionManager에 Session 생성 로직 주입
+     //게이트에서는 클라이언트 세션과 서버 세션을 관리
+    SessionManager::GetInstance().RegisterFactory(SessionType::CLIENT,[]() {
+        return new ClientSession(); 
+        });
+
+    SessionManager::GetInstance().RegisterFactory(SessionType::GAME, []() {
+        return new ServerSession();
+        });
+
+	// 3. 패킷 핸들러 초기화
+    InitGateHandlers();
+
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
+
     // 5. Accept 시작
 	network.InitFromConfig();
 
-    LOG("GateServer 실행 시작");
-
-    // 6. IOCP 루프 진입
+    // 6. 워커 스레드 가동
     iocp.Run();
-
+   
+    LOG("IOCP 연결 시작\n");
 
     while (true)
     {
         Sleep(1000);
+        // todo : 커맨드, 이벤트 탈출 
     }
 
     // 7. 종료 처리
 	iocp.ShutDown();
-
-
     WSACleanup();
 
     return 0;

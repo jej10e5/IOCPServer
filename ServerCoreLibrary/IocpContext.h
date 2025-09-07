@@ -3,7 +3,7 @@
 class Session;
 
 // 이벤트의 용도 구분하기 위함
-enum class IocpOperation
+enum class IocpOperation : UINT8
 {
     ACCEPT,     // 연결 수락
     RECV,       // 데이터 수신

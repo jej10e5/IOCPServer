@@ -4,6 +4,15 @@
 
 bool IocpCore::Initialize()
 {
+    // 1. Winsock 초기화
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        ERROR_LOG("WSAStartup 실패");
+        return false;
+    }
+
+    // 2. 완료 포트 생성
     m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
     if (m_iocpHandle == NULL)
@@ -112,14 +121,30 @@ void IocpCore::WorkerLoop()
 
         if (!m_isRunning) break; // 종료 플래그 확인
 
-        if (result == FALSE || overlapped == nullptr)
+        if (overlapped == nullptr)
         {
-            // 소켓이 닫혔거나 오류 발생 → 세션 정리 예정
             continue;
         }
 
         // IocpContext로 캐스팅 (OVERLAPPED 확장 구조)
         IocpContext* pContext = reinterpret_cast<IocpContext*>(overlapped);
+
+        // 오류 완료 처리 : 세션 정리/메모리 누수 방지
+        if (result == FALSE) 
+        {
+             DWORD err = GetLastError();
+            // RECV/SEND 오류 → 세션 종료
+            if (pContext->eOperation == IocpOperation::RECV ||
+                pContext->eOperation == IocpOperation::SEND) 
+            {
+                pContext->pSession->Disconnect();
+                
+            }
+            // ACCEPT 오류 → 세션 반환 및 다음 Accept 재포스트는 Session/Listener 쪽 로직에 위임
+            delete pContext;
+            continue;
+            
+        }
 
         // 작업 종류에 따라 분기
         switch (pContext->eOperation)

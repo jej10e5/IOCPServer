@@ -83,8 +83,15 @@ bool Listener::PostAccept(SessionType _eType)
 {
 	SessionManager& sessionManager = SessionManager::GetInstance();
 	Session* pSession = sessionManager.GetEmptySession(_eType);
+	if (!pSession) 
+	{ 
+		ERROR_LOG("no empty session"); 
+		return false; 
+	}
+
 	SOCKET clientSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	pSession->SetListenSocket(clientSocket);
+	pSession->SetAcceptedSocket(clientSocket);
+	pSession->SetListenerSocket(m_ListenSocket);
 	
 	//g_IocpCore.RegisterSocket(clientSocket, reinterpret_cast<ULONG_PTR>(pSession));
 

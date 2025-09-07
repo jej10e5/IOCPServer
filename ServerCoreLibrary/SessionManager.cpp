@@ -2,7 +2,7 @@
 #include "SessionManager.h"
 #include "Session.h"
 
-void SessionManager::RegistFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize)
+void SessionManager::RegisterFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize)
 {
 	// 일단 락 걸고
 	std::lock_guard<std::mutex> guard(m_SessionLock);
@@ -44,7 +44,7 @@ void SessionManager::Release(SessionType _eType, Session* _pSession)
 {
 	std::lock_guard<std::mutex> guard(m_SessionLock);
 
-	_pSession->Init();
+	_pSession->Init(_eType);
 	m_SessionPool[_eType].push(_pSession);
 }
 
@@ -54,6 +54,7 @@ SessionType SessionManager::StringToSessionType(const std::wstring& typeStr)
 		return SessionType::CLIENT;
 	else if(typeStr == L"Game")
 		return SessionType::GAME;
-
+	else if (typeStr == L"GameDB")
+		return SessionType::GAMEDB;
 	return SessionType::NONE; // 기본값으로 Client 반환
 }

@@ -2,9 +2,10 @@
 #include "pch.h"
 #include "IocpContext.h"
 
-/// <summary>
-/// IOCP Core : 이 클래스에서는 커널에서 완료한 I/O 작업을 GQCS(GetQuueuedCompletionStatus())로 받아서 적절한 세션/작업 처리자에게 전달하는 역할
-/// </summary>
+// <summary>
+// IOCP Core : 이 클래스에서는 커널에서 완료한 I/O 작업을 GQCS(GetQuueuedCompletionStatus())로 
+// 받아서 적절한 세션/작업 처리자에게 전달하는 역할
+// </summary>
 
 class IocpCore : public Singleton<IocpCore>
 {

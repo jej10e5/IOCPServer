@@ -8,7 +8,8 @@
 void Session::Init(SessionType _eType)
 {
 	m_RecvBuffer.Clear();
-	m_Socket = INVALID_SOCKET;
+	m_AcceptSocket = INVALID_SOCKET;
+	m_ListenSocket = INVALID_SOCKET;
 	m_eSessionType = _eType;
 }
 bool Session::Recv()
@@ -25,7 +26,7 @@ bool Session::Recv()
 	DWORD dwFlags = 0;
 	DWORD dwRecvBytes = 0;
 
-	if (m_Socket == INVALID_SOCKET)
+	if (m_AcceptSocket == INVALID_SOCKET)
 	{
 		ERROR_LOG("Recv 실패 : m_Socket이 INVALID_SOCKET상태");
 		return false;
@@ -35,7 +36,7 @@ bool Session::Recv()
 	LOG("WSARecv OVERLAPPED 주소: " << static_cast<void*>(pContext));
    // 2. WSABUF 설정
    // 4. WSARecv 호출
-	INT32 i32result = WSARecv(m_Socket, &pContext->tWsaBuf, 1, &dwRecvBytes, &dwFlags, pContext, nullptr);
+	INT32 i32result = WSARecv(m_AcceptSocket, &pContext->tWsaBuf, 1, &dwRecvBytes, &dwFlags, pContext, nullptr);
 
 	// 5. 실패 시 처리 (WSA_IO_PENDING은 정상으로 간주)
 	if (i32result == SOCKET_ERROR)
@@ -51,42 +52,41 @@ bool Session::Recv()
 
 	return true;
 }
-
 bool Session::Send(const char* _pData, INT32 _i32Len)
 {
-	// 클라이언트에 데이터 비동기 방식으로 보내는 함수
-
-	// 1. IocpContext 생성	
-	IocpContext* pContext = new IocpContext();
+	std::lock_guard<std::mutex> guard(m_SendLock);
+	if (m_SendQueue.empty()) 
+	{  // 보낼 게 없으면 종료
+		m_bIsSending = false;
+		return true;
+		
+	}
+	auto * pContext = new IocpContext();
 	ZeroMemory(pContext, sizeof(IocpContext));
-
-	// 2. eOperation = SEND
 	pContext->eOperation = IocpOperation::SEND;
 	pContext->pSession = this;
 
-	// 3. WSABUF 설정 (buf, len)
-	memcpy(pContext->cBuffer, _pData, _i32Len);
-	pContext->tWsaBuf.buf = pContext->cBuffer;
-	pContext->tWsaBuf.len = _i32Len;
+	auto & item = m_SendQueue.front();
+	char* p = item.buf->data() + item.off;
+	size_t n = item.buf->size() - item.off;
+	pContext->tWsaBuf.buf = p;
+	pContext->tWsaBuf.len = static_cast<ULONG>(n);
 
-	DWORD dwFlag=0;
-	DWORD dwSentBytes=0;
+	DWORD flags = 0;
+	DWORD bytes = 0;
+	int iRet = WSASend(m_AcceptSocket, &pContext->tWsaBuf, 1, &bytes, flags, pContext, NULL);
 
-	// 4. WSASend 호출
-	INT32 i32Result = WSASend(m_Socket, &pContext->tWsaBuf, 1, &dwSentBytes, 0, pContext, nullptr);
-
-	if (i32Result == SOCKET_ERROR)
+	if (iRet == SOCKET_ERROR)
 	{
-		// 5. WSA_IO_PENDING 예외 처리
-		INT32 i32Error = WSAGetLastError();
+		int i32Error = WSAGetLastError();
 		if (i32Error != WSA_IO_PENDING)
 		{
 			ERROR_LOG("WSASend 실패 : " << i32Error);
 			delete pContext;
+			Disconnect();
 			return false;
 		}
 	}
-
 	return true;
 }
 
@@ -96,60 +96,74 @@ void Session::OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen)
 {
 	if (_dwSendLen == 0)
 	{
-		// 상대방이 소켓을 종료함
+		// 상대방 종료로 간주
 		Disconnect();
+		return;
 	}
-	else
+
+	bool needPost = false;
+
 	{
 		std::lock_guard<std::mutex> guard(m_SendLock);
-		if (!m_SendQueue.empty())
-		{
-			m_SendQueue.pop(); // 현재 메세지 제거
-		}
 
-		// 다음 데이터 있는지 체크
-		if (!m_SendQueue.empty())
-		{
-			// 있으면 send 호출
-			auto& next = m_SendQueue.front();
-			Send(next.data(), static_cast<INT32>(next.size()));
+		if (m_SendQueue.empty()) {
+			m_bIsSending = false;
 			return;
 		}
 
-		// 없으면 풀어주기
-		m_bIsSending = false;
+		// 진행 상황 업데이트
+		auto& item = m_SendQueue.front();
+		item.off += _dwSendLen;
 
-		LOG("Send 완료: " << _dwSendLen << " 바이트 전송됨");
+		if (item.off >= item.buf->size()) {
+			// 이번 버퍼 송신 완료 → 팝
+			m_SendQueue.pop();
+			if (!m_SendQueue.empty()) {
+				// 아직 남아있으면 다음 걸 이어서 포스트해야 함
+				needPost = true;
+			}
+			else {
+				// 더 보낼 게 없으면 플래그 내림
+				m_bIsSending = false;
+			}
+		}
+		else {
+			// 이번 버퍼가 아직 남아있음 → 이어서 포스트
+			needPost = true;
+		}
+	} // ← 여기서 락 해제됨
+
+	if (needPost) {
+		Send(nullptr, 0);  // 다음 WSASend 포스트 (락 없이 진입)
 	}
 
 }
 
 void Session::OnAcceptCompleted(IocpContext* _pContext)
 {
+
 	NetworkManager& networkManager = NetworkManager::GetInstance();
-	SOCKET listenSock = m_Socket;
+	SOCKET listenSock = m_ListenSocket;
 	// SO_UPDATE_ACCEPT_CONTEXT 설정하는 이유
 	//  - 커널에게 이 소켓은 이 리슨 소켓을 통해 accept된거라고 알려주는 역할
 	//  - 그래야 커널이 해당 소켓 리소스를 정리할 타이밍을 제대로 계산
-	INT32 i32OptResult = setsockopt(m_Socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSock, sizeof(SOCKET));
+	INT32 i32OptResult = setsockopt(m_AcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSock, sizeof(SOCKET));
 	SessionManager& sessionManager = SessionManager::GetInstance();
 	if (i32OptResult == SOCKET_ERROR)
 	{
 		ERROR_LOG("setsockopt  SO_UPDATE_ACCEPT_CONTEXT  실패 : " << WSAGetLastError());
 
-		closesocket(m_Socket);
+		closesocket(m_AcceptSocket);
 		sessionManager.Release(m_eSessionType, this);
-		delete _pContext;
 		return;
 	}
 
 	IocpCore& iocpCore = IocpCore::GetInstance();
-	if (!iocpCore.RegisterSocket(m_Socket, reinterpret_cast<ULONG_PTR>(this)))
+	if (!iocpCore.RegisterSocket(m_AcceptSocket, reinterpret_cast<ULONG_PTR>(this)))
 	{
 		ERROR_LOG("소켓 IOCP 등록 실패");
-		closesocket(m_Socket);
+		closesocket(m_AcceptSocket);
 		sessionManager.Release(m_eSessionType, this);
-		delete _pContext;
 		return;
 	}
 	LOG("클라이언트 접속 완료");
@@ -170,7 +184,7 @@ void Session::Disconnect()
 	// 1. 중복 Disconnect 방지 (isConnected 같은 상태변수 있으면 체크)
 	
 	// 2. 소켓 닫기: closesocket(m_socket)
-	closesocket(m_Socket);
+	closesocket(m_AcceptSocket);
 	
 	LOG("소켓 닫기");
 
@@ -182,18 +196,16 @@ void Session::Disconnect()
 
 void Session::SendPacket(const char* _pData, INT32 _i32Len)
 {
-	std::lock_guard<std::mutex> guard(m_SendLock);
-
-	// 보낼 데이터 복사
-	std::vector<char> vPacket(_pData, _pData + _i32Len);
-	m_SendQueue.push(std::move(vPacket));
-
-	if (!m_bIsSending)
+	auto pkt = std::make_shared<std::vector<char>>(_pData, _pData + _i32Len);
 	{
-		m_bIsSending = true;
-		auto& front = m_SendQueue.front();
-		Send(front.data(), static_cast<INT32>(front.size()));
+		std::lock_guard<std::mutex> guard(m_SendLock);
+		m_SendQueue.push(SendItem{ pkt, 0 });
+		if (m_bIsSending)
+			return;             // 이미 전송 중이면 큐에만 쌓고 끝
+		m_bIsSending = true;    // 전송 시작 플래그 on
 	}
+	// 큐의 front를 기준으로 첫 WSASend 포스트
+	Send(nullptr, 0);           // (인자는 무시; front 기반으로 보냄)
 
 }
 
