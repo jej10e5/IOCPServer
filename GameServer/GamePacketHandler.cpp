@@ -9,10 +9,11 @@ void GamePacketHandler::Handle_Eco(Session* _pSession, const char* _pData, UINT1
 	LOG("echo : " << msg);
 
 	// 응답 패킷 구성
-	DCP_ECHO sendPkt;
+	SP_ECHO sendPkt;
 	strcpy_s(sendPkt._msg, msg.c_str());
 
-	_pSession->SendPacket(reinterpret_cast<const char*>(&sendPkt), sendPkt._header.size);
+	SessionManager& sessionManager = SessionManager::GetInstance();
+	sessionManager.BroadCastActive((char*)&sendPkt, sendPkt._header.size);
 }
 
 void GamePacketHandler::Handle_DBEco(Session* _pSession, const char* _pData, UINT16 _ui16size)
@@ -23,6 +24,7 @@ void GamePacketHandler::Handle_DBEco(Session* _pSession, const char* _pData, UIN
 	// 응답 패킷 구성
 	SP_ECHO sendPkt;
 	strcpy_s(sendPkt._msg, msg.c_str());
+
 
 	_pSession->SendPacket(reinterpret_cast<const char*>(&sendPkt), sendPkt._header.size);
 }

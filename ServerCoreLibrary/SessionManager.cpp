@@ -2,6 +2,9 @@
 #include "SessionManager.h"
 #include "Session.h"
 
+
+SessionManager g_SessionManager;
+
 void SessionManager::RegisterFactory(SessionType _eType, SessionFactory _factory, INT32 _i32PoolSize)
 {
 	// 일단 락 걸고
@@ -63,26 +66,42 @@ UINT64 SessionManager::RegisterActive(Session* _pSession)
 {
 	const UINT64 t = m_ui64NextToken.fetch_add(1, std::memory_order_relaxed);
 	std::lock_guard<std::mutex> g(m_SessionLock);
-	m_ActiveSessios[t] = _pSession;
+	m_ActiveSessions[t] = _pSession;
 	return t;
 }
 
 void SessionManager::UnregisterActive(Session* _pSession)
 {
 	std::lock_guard<std::mutex> g(m_ActiveLock);
-	for (auto iter = m_ActiveSessios.begin(); iter != m_ActiveSessios.end();iter++)
+	for (auto iter = m_ActiveSessions.begin(); iter != m_ActiveSessions.end();iter++)
 	{
 		if (iter->second == _pSession)
 		{
-			m_ActiveSessios.erase(iter);
+			m_ActiveSessions.erase(iter);
 			break;
 		}
 	}
 }
 
-Session* SessionManager::FinByToken(UINT64 _ui64Token)
+Session* SessionManager::FindByToken(UINT64 _ui64Token)
 {
 	std::lock_guard<std::mutex> g(m_ActiveLock);
-	auto iter = m_ActiveSessios.find(_ui64Token);
-	return (iter == m_ActiveSessios.end()) ? nullptr : iter->second;
+	auto iter = m_ActiveSessions.find(_ui64Token);
+	return (iter == m_ActiveSessions.end()) ? nullptr : iter->second;
+}
+
+void SessionManager::BroadCastActive(const char* _pSendMsg, UINT16 _ui16size)
+{
+	vector<Session*> snapshot;
+	{
+		std::lock_guard<std::mutex> g(m_ActiveLock);
+		snapshot.reserve(m_ActiveSessions.size());
+		for (auto& s : m_ActiveSessions)
+			snapshot.push_back(s.second);
+
+	}
+	for (auto iter : snapshot)
+	{
+		iter->SendPacket(_pSendMsg, _ui16size);
+	}
 }

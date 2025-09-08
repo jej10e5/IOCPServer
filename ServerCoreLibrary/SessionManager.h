@@ -20,12 +20,14 @@ public:
 
 	UINT64 RegisterActive(Session* _pSession);
 	void UnregisterActive(Session* _pSession);
-	Session* FinByToken(UINT64 _ui64Token);
+	Session* FindByToken(UINT64 _ui64Token);
+
+	void BroadCastActive(const char* _pSendMsg, UINT16 _ui16size);
 
 
 private:
 	std::atomic<UINT64> m_ui64NextToken{ 1 };
-	std::unordered_map<UINT64, Session*> m_ActiveSessios;
+	std::unordered_map<UINT64, Session*> m_ActiveSessions;
 	std::mutex m_ActiveLock;
 
 	std::unordered_map<SessionType, std::stack<Session*>> m_SessionPool;
@@ -33,3 +35,4 @@ private:
 	std::mutex m_SessionLock;
 };
 
+extern SessionManager g_SessionManager;
