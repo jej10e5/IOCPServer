@@ -12,6 +12,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GamePacketHandler.cpp" />
     <ClCompile Include="CommandManager.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="CUnitPC.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -19,5 +21,7 @@
     </ClInclude>
     <ClInclude Include="GamePacketHandler.h" />
     <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="CUnitPC.h" />
   </ItemGroup>
 </Project>

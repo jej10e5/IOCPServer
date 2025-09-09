@@ -10,6 +10,7 @@ void InitGateHandlers()
 {
     // 패킷 핸들러 등록
     REGISTER_HANDLER(CM_ECHO, GamePacketHandler::Handle_Eco);
+    REGISTER_HANDLER(CM_LOGIN, GamePacketHandler::Handle_Login);
     REGISTER_HANDLER(CM_CHAT, GamePacketHandler::Handle_Chat);
 }
 

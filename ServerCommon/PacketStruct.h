@@ -43,14 +43,12 @@ struct CP_LOGIN
 {
 	CP_LOGIN()
 	{
-		_header.id = CM_CHAT;
+		_header.id = CM_LOGIN;
 		_header.size = sizeof(CP_LOGIN);
-		memset(&_id, 0x00, sizeof(_id));
-		memset(&_pw, 0x00, sizeof(_pw));
+		memset(&_name, 0x00, sizeof(_name));
 	}
 	PacketHeader _header;
-	char _id[256];
-	char _pw[256];
+	char _name[256];
 };
 #pragma pack(pop)
 
@@ -59,14 +57,48 @@ struct SP_LOGIN
 {
 	SP_LOGIN()
 	{
-		_header.id = CM_CHAT;
+		_header.id = SM_LOGIN;
 		_header.size = sizeof(SP_LOGIN);
-		memset(&_i32Result, 0x00, sizeof(_i32Result));
-		memset(&_i32Accunique, 0x00, sizeof(_i32Accunique));
+		memset(&_ui64id, 0x00, sizeof(_ui64id));
+		memset(&_name, 0x00, sizeof(_name));
 	}
 	PacketHeader _header;
-	INT32 _i32Result;
-	INT32 _i32Accunique;
+	UINT64 _ui64id;
+	char _name[256];
+};
+#pragma pack(pop)
+
+
+
+#pragma pack(push,1)
+struct CP_CHAT
+{
+	CP_CHAT()
+	{
+		_header.id = CM_CHAT;
+		_header.size = sizeof(CP_CHAT);
+		memset(&_chat, 0x00, sizeof(_chat));
+	}
+	PacketHeader _header;
+	char _chat[256];
+};
+#pragma pack(pop)
+
+#pragma pack(push,1)
+struct SP_CHAT
+{
+	SP_CHAT()
+	{
+		_header.id = SM_CHAT;
+		_header.size = sizeof(SP_CHAT);
+		memset(&_ui64id, 0x00, sizeof(_ui64id));
+		memset(&_name, 0x00, sizeof(_name));
+		memset(&_chat, 0x00, sizeof(_chat));
+	}
+	PacketHeader _header;
+	UINT64 _ui64id;
+	char _name[256];
+	char _chat[256];
 };
 #pragma pack(pop)
 
