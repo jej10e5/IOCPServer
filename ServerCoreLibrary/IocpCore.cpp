@@ -134,8 +134,7 @@ void IocpCore::WorkerLoop()
         {
              DWORD err = GetLastError();
             // RECV/SEND 오류 → 세션 종료
-            if (pContext->eOperation == IocpOperation::RECV ||
-                pContext->eOperation == IocpOperation::SEND) 
+            if (pContext->eOperation == IocpOperation::RECV || pContext->eOperation == IocpOperation::SEND) 
             {
                 pContext->pSession->Disconnect();
                 

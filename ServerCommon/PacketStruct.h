@@ -19,7 +19,7 @@ struct CP_ECHO
 		memset(&_msg, 0x00, sizeof(_msg));
 	}
 	PacketHeader _header;
-	char _msg[256];
+	char _msg[MAX_CHAT_LENGTH];
 };
 #pragma pack(pop)
 
@@ -33,7 +33,7 @@ struct SP_ECHO
 		memset(&_msg, 0x00, sizeof(_msg));
 	}
 	PacketHeader _header;
-	char _msg[256];
+	char _msg[MAX_CHAT_LENGTH];
 };
 #pragma pack(pop)
 
@@ -48,7 +48,7 @@ struct CP_LOGIN
 		memset(&_name, 0x00, sizeof(_name));
 	}
 	PacketHeader _header;
-	char _name[256];
+	char _name[MAX_NICKNAME_LENGTH];
 };
 #pragma pack(pop)
 
@@ -64,7 +64,7 @@ struct SP_LOGIN
 	}
 	PacketHeader _header;
 	UINT64 _ui64id;
-	char _name[256];
+	char _name[MAX_NICKNAME_LENGTH];
 };
 #pragma pack(pop)
 
@@ -80,7 +80,7 @@ struct CP_CHAT
 		memset(&_chat, 0x00, sizeof(_chat));
 	}
 	PacketHeader _header;
-	char _chat[256];
+	char _chat[MAX_CHAT_LENGTH];
 };
 #pragma pack(pop)
 
@@ -97,8 +97,8 @@ struct SP_CHAT
 	}
 	PacketHeader _header;
 	UINT64 _ui64id;
-	char _name[256];
-	char _chat[256];
+	char _name[MAX_NICKNAME_LENGTH];
+	char _chat[MAX_CHAT_LENGTH];
 };
 #pragma pack(pop)
 

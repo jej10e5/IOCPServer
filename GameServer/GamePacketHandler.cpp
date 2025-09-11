@@ -50,9 +50,10 @@ void GamePacketHandler::Handle_Chat(Session* _pSession, const char* _pData, UINT
 		return;
 
 	pUser->GetName(sendMsg._name);
-	sendMsg._name[255] = 0;
+	memcpy(sendMsg._chat, pMsg->_chat, MAX_CHAT_LENGTH);
+	sendMsg._name[MAX_CHAT_LENGTH -1] = 0;
 
-	memcpy(sendMsg._chat, pMsg->_chat, 256 - 1);
+	LOG("chat - ["<< sendMsg._name<<"] :" << sendMsg._chat);
 
 	//_pSession->SendPacket(reinterpret_cast<const char*>(&sendMsg), sendMsg._header.size);
 	SessionManager& sessionManager = SessionManager::GetInstance();
@@ -69,9 +70,9 @@ void GamePacketHandler::Handle_Login(Session* _pSession, const char* _pData, UIN
 	if (pMsg == NULL)
 		return;
 
-	char name[256] = { 0 };                
-	std::memcpy(name, pMsg->_name, 256 - 1);
-	name[256 - 1] = '\0';
+	char name[MAX_NICKNAME_LENGTH] = { 0 };
+	std::memcpy(name, pMsg->_name, MAX_NICKNAME_LENGTH - 1);
+	name[MAX_NICKNAME_LENGTH - 1] = '\0';
 
 	g_GameManager.Login(_pSession->GetToken(), name);
 

@@ -33,8 +33,8 @@ bool Session::Recv()
 		return false;
 	}
 
-	LOG("WSARecv 버퍼 주소: " << static_cast<void*>(pContext->tWsaBuf.buf));
-	LOG("WSARecv OVERLAPPED 주소: " << static_cast<void*>(pContext));
+	//LOG("WSARecv 버퍼 주소: " << static_cast<void*>(pContext->tWsaBuf.buf));
+	//LOG("WSARecv OVERLAPPED 주소: " << static_cast<void*>(pContext));
    // 2. WSABUF 설정
    // 4. WSARecv 호출
 	INT32 i32result = WSARecv(m_AcceptSocket, &pContext->tWsaBuf, 1, &dwRecvBytes, &dwFlags, pContext, nullptr);
@@ -186,7 +186,7 @@ void Session::Disconnect()
 	// 2. 소켓 닫기: closesocket(m_socket)
 	closesocket(m_AcceptSocket);
 	
-	LOG("소켓 닫기");
+	LOG("클라이언트 접속 종료 - token : " << GetToken());
 
 	// 3. 세션 정리 (메모리 삭제 or 풀에 반납)
 	SessionManager& sessionManager = SessionManager::GetInstance();

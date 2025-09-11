@@ -18,6 +18,6 @@ public:
 
 private:
 	UINT64 m_ui64Id;
-	char m_cName[256];
+	char m_cName[MAX_NICKNAME_LENGTH];
 };
 
