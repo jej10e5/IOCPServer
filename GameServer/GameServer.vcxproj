@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="CommandManager.h" />
     <ClInclude Include="CUnitPC.h" />
+    <ClInclude Include="GameDispatcher.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GamePacketHandler.h" />
     <ClInclude Include="pch.h" />
@@ -28,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="CommandManager.cpp" />
     <ClCompile Include="CUnitPC.cpp" />
+    <ClCompile Include="GameDispatcher.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GamePacketHandler.cpp" />
     <ClCompile Include="main.cpp" />

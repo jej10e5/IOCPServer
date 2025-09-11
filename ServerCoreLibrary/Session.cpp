@@ -11,7 +11,7 @@ void Session::Init(SessionType _eType)
 	m_AcceptSocket = INVALID_SOCKET;
 	m_ListenSocket = INVALID_SOCKET;
 	m_eSessionType = _eType;
-	m_ui64Token = 0;
+	m_ui64SessionId = 0;
 }
 bool Session::Recv()
 {
@@ -168,8 +168,8 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 		return;
 	}
 
-	m_ui64Token = sessionManager.RegisterActive(this);
-	LOG("클라이언트 접속 완료 (token = " << m_ui64Token << ")");
+	m_ui64SessionId = sessionManager.RegisterActive(this);
+	LOG("클라이언트 접속 완료 (token = " << m_ui64SessionId << ")");
 
 
 	if (!Recv())
@@ -179,20 +179,34 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 	networkManager.AcceptListener(m_eSessionType);
 }
 
+// Session.cpp
 void Session::Disconnect()
 {
-	// 1. 중복 Disconnect 방지 (isConnected 같은 상태변수 있으면 체크)
-	
-	// 2. 소켓 닫기: closesocket(m_socket)
-	closesocket(m_AcceptSocket);
-	
-	LOG("클라이언트 접속 종료 - token : " << GetToken());
+	bool expected = false;
+	if (!m_bDisconnected.compare_exchange_strong(expected, true))
+		return; // 이미 종료 처리 중
 
-	// 3. 세션 정리 (메모리 삭제 or 풀에 반납)
-	SessionManager& sessionManager = SessionManager::GetInstance();
+	const UINT64 sid = GetSessionId(); // ← 스냅샷
+
+	// 1) I/O 차단
+	if (m_AcceptSocket != INVALID_SOCKET) {
+		shutdown(m_AcceptSocket, SD_BOTH);
+		closesocket(m_AcceptSocket);
+		m_AcceptSocket = INVALID_SOCKET; // ← 플래그 정리
+	}
+	LOG("클라이언트 접속 종료 - token : " << sid);
+
+	// 2) 먼저 도메인 통지
+	if (m_onDisconnect) {
+		auto cb = m_onDisconnect;     // 안전하게 복사
+		m_onDisconnect = nullptr;     // 재진입 방지
+		cb(sid);
+	}
+
+	// 3) 마지막에 세션 매니저 정리
+	auto& sessionManager = SessionManager::GetInstance();
 	sessionManager.UnregisterActive(this);
 	sessionManager.Release(m_eSessionType, this);
-
 }
 
 void Session::SendPacket(const char* _pData, INT32 _i32Len)

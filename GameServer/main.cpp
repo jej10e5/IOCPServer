@@ -4,6 +4,7 @@
 #include "ServerSession.h"
 #include "IocpCore.h"
 #include "GamePacketHandler.h"
+#include "GameManager.h"
 
 
 void InitGateHandlers()
@@ -45,11 +46,12 @@ int main()
 
     LOG("IOCP 연결 시작\n");
 
-    while (true)
-    {
-        Sleep(1000);
-        // todo : 커맨드, 이벤트 탈출 
-    }
+    g_GameManager.StartLoop(std::chrono::milliseconds(50));
+
+    for (std::string line; std::getline(std::cin, line); )
+        if (line == "q") break;
+
+    g_GameManager.StopLoop();
 
     // 7. 종료 처리
     iocp.ShutDown();

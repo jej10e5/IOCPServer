@@ -3,12 +3,14 @@
 #include "RingBuffer.h"
 #include "SessionType.h"
 #include <memory>
-
+#include <functional>
 struct IocpContext;
 
 class Session
 {
 public:
+	using DisconnectCb = std::function<void(UINT64)>;
+
 	Session() : m_RecvBuffer(MAX_RECV_BUFFER_SIZE)
 	{
 		Init(SessionType::NONE);
@@ -23,8 +25,9 @@ public:
 	void Disconnect();
 	void SetAcceptedSocket(SOCKET _socket) { m_AcceptSocket = _socket; }
 	void SetListenerSocket(SOCKET _socket) { m_ListenSocket = _socket; }
+	void SetOnDisconnect(DisconnectCb cb) { m_onDisconnect = std::move(cb); }
 
-	UINT64 GetToken() const { return m_ui64Token; }
+	UINT64 GetSessionId() const { return m_ui64SessionId; }
 
 	// 패킷 구현부
 	void SendPacket(const char* _pData, INT32 _i32Len) ;
@@ -49,7 +52,11 @@ private:
 	std::mutex m_SendLock;
 	bool m_bIsSending = false; // 현재 전송 중 여부
 
-	UINT64 m_ui64Token = 0; // 활성 토큰
+	UINT64 m_ui64SessionId = 0; // 세션 아이디
+
+	DisconnectCb m_onDisconnect{};
+
+	std::atomic<bool> m_bDisconnected{ false };
 };
 
 

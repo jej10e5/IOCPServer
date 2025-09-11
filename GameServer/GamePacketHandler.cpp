@@ -44,8 +44,8 @@ void GamePacketHandler::Handle_Chat(Session* _pSession, const char* _pData, UINT
 	// 응답 패킷 구성
 	SP_CHAT sendMsg;
 
-	sendMsg._ui64id = _pSession->GetToken();
-	auto pUser = g_GameManager.FindUserById(_pSession->GetToken());
+	sendMsg._ui64id = _pSession->GetSessionId();
+	auto pUser = g_GameManager.FindUserById(_pSession->GetSessionId());
 	if (pUser == NULL)
 		return;
 
@@ -74,12 +74,12 @@ void GamePacketHandler::Handle_Login(Session* _pSession, const char* _pData, UIN
 	std::memcpy(name, pMsg->_name, MAX_NICKNAME_LENGTH - 1);
 	name[MAX_NICKNAME_LENGTH - 1] = '\0';
 
-	g_GameManager.Login(_pSession->GetToken(), name);
+	g_GameManager.Login(_pSession, name);
 
 	// 응답 패킷 구성
 	SP_LOGIN sendMsg;
 
-	sendMsg._ui64id = _pSession->GetToken();
+	sendMsg._ui64id = _pSession->GetSessionId();
 	memcpy(sendMsg._name, pMsg->_name, sizeof(sendMsg._name));
 
 	_pSession->SendPacket(reinterpret_cast<const char*>(&sendMsg), sendMsg._header.size);

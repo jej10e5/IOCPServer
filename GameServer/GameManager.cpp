@@ -1,5 +1,7 @@
 #include "GameManager.h"
 #include"CUnitPC.h"
+#include "ClientSession.h"
+#include "GameDispatcher.h"
 
 CGameManager g_GameManager;
 
@@ -11,11 +13,79 @@ void CGameManager::Init()
 	}
 
 }
-void CGameManager::Login(UINT64 _ui64Id, char* _pName)
+// GameManager.cpp
+bool CGameManager::StartLoop(std::chrono::milliseconds tick)
 {
+	bool expected = false;
+	if (!m_bRunning.compare_exchange_strong(expected, true))
+		return false; // 이미 실행 중
+
+	m_Tick = tick;
+	m_GameThread = std::thread(&CGameManager::RunLoop, this);
+	return true;
+}
+
+void CGameManager::StopLoop()
+{
+	bool expected = true;
+	if (!m_bRunning.compare_exchange_strong(expected, false))
+		return; // 이미 정지
+
+	if (m_GameThread.joinable())
+		m_GameThread.join();
+}
+
+void CGameManager::RunLoop()
+{
+	using clock = std::chrono::steady_clock;
+	auto next = clock::now();
+
+	while (m_bRunning) {
+		// 1) 네트워크/다른 스레드에서 올라온 일을 게임 스레드에서 처리
+		GameDispatcher::Instance().Drain(2000); // 프레임당 처리 한도
+
+		// 2) 도메인 틱
+		// 루프 돌릴거 있으면 여기서 돌리기
+
+		// 3) 고정 시간 스텝 유지
+		next += m_Tick;
+		std::this_thread::sleep_until(next);
+	}
+
+	// 종료 직전 남은 작업 한 번 더 비우고 싶으면:
+	GameDispatcher::Instance().Drain(100000);
+}
+
+void CGameManager::Login(Session* _pSession, char* _pName)
+{
+	std::scoped_lock lk(m_UserMtx);
 	auto pClient = GetEmptyPC();
 	pClient->SetName(_pName);
-	pClient->SetId(_ui64Id);
+	pClient->SetId(_pSession->GetSessionId());
+
+	// GameManager.cpp - 로그인 시 콜백 설정 부분
+	_pSession->SetOnDisconnect([this](UINT64 sid) {
+		GameDispatcher::Instance().Post([this, sid] {
+			this->Logout(sid);
+			});
+		});
+
+	m_SessionIdToPC[_pSession->GetSessionId()] = pClient;
+
+}
+
+void CGameManager::Logout(UINT64 _ui64Id)
+{
+	std::scoped_lock lk(m_UserMtx);
+
+	auto itPC = m_SessionIdToPC.find(_ui64Id);
+	if (itPC != m_SessionIdToPC.end()) 
+	{
+		CUnitPC* pPC = itPC->second;
+		m_SessionIdToPC.erase(itPC);
+		ReleasePC(pPC); // 내부에서 Init() 후 빈 풀로
+	}
+
 
 }
 
@@ -62,6 +132,7 @@ void CGameManager::ReleasePC(CUnitPC* _pUser)
 	*it = m_Users.back();
 	m_Users.pop_back();
 
+	_pUser->Init();
 	m_EmptyUnits.emplace_back(_pUser);
 
 }
