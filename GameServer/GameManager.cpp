@@ -7,7 +7,7 @@ CGameManager g_GameManager;
 
 void CGameManager::Init()
 {
-	for (int i = 0;i < 100;i++)
+	for (int i = 0;i < POOL_SIZE_PC;i++)
 	{
 		m_EmptyUnits.emplace_back(new CUnitPC());
 	}
@@ -104,7 +104,7 @@ CUnitPC* CGameManager::GetEmptyPC()
 {
 	if (m_EmptyUnits.empty())
 	{
-		for (int i = 0;i < 10;i++)
+		for (int i = 0;i < POOL_SIZE_PC_EXTRA;i++)
 		{
 			m_EmptyUnits.emplace_back(new CUnitPC());
 		}
