@@ -11,6 +11,9 @@
 #include <limits>
 #include <cstring>
 #include <mutex>
+#include <conio.h>   // _kbhit, _getwch
+#include <cwctype>   // iswprint
+
 
 #include "../ServerCommon/PacketStruct.h"
 #pragma comment(lib, "ws2_32.lib")
@@ -21,40 +24,48 @@ std::atomic<bool> g_vtEnabled{ false };
 
 UINT64 ui64Id;
 
-static bool EnableVTMode() {
+static bool EnableVTMode() 
+{
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return false;
+    if (hOut == INVALID_HANDLE_VALUE) 
+        return false;
     DWORD mode = 0;
-    if (!GetConsoleMode(hOut, &mode)) return false;
+    if (!GetConsoleMode(hOut, &mode)) 
+        return false;
     mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if (!SetConsoleMode(hOut, mode)) return false;
+    if (!SetConsoleMode(hOut, mode)) 
+        return false;
     return true;
 }
 
-static void ClearLastInputLine() {
+static void ClearCurrentLine()
+{
     std::lock_guard<std::mutex> lk(g_coutMtx);
-    if (g_vtEnabled.load()) {
-        // 한 줄 위로 이동 후 그 줄 지우기
-        std::cout << "\x1b[1A\x1b[2K";
+    if (g_vtEnabled.load()) 
+    {
+        std::cout << "\r\x1b[2K"; // 커서가 있는 현재 줄만 지움
         std::cout.flush();
     }
-    else {
+    else 
+    {
         HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
         CONSOLE_SCREEN_BUFFER_INFO csbi{};
-        if (!GetConsoleScreenBufferInfo(hOut, &csbi)) return;
-        if (csbi.dwCursorPosition.Y == 0) return; // 첫 줄이면 패스
-        COORD linePos{ 0, static_cast<SHORT>(csbi.dwCursorPosition.Y - 1) };
+        if (!GetConsoleScreenBufferInfo(hOut, &csbi)) 
+            return;
+
+        COORD linePos{ 0, csbi.dwCursorPosition.Y };
         DWORD written = 0;
-        SetConsoleCursorPosition(hOut, linePos);
         FillConsoleOutputCharacterA(hOut, ' ', csbi.dwSize.X, linePos, &written);
         SetConsoleCursorPosition(hOut, linePos);
     }
 }
 
 // -------------------- Recv 유틸 --------------------
-static int RecvAll(SOCKET s, char* buf, int len) {
+static int RecvAll(SOCKET s, char* buf, int len) 
+{
     int got = 0;
-    while (got < len) {
+    while (got < len) 
+    {
         int r = recv(s, buf + got, len - got, 0);
         if (r <= 0) return r; // 0: 종료, <0: 에러
         got += r;
@@ -62,12 +73,14 @@ static int RecvAll(SOCKET s, char* buf, int len) {
     return got;
 }
 
-static bool ReadOnePacket(SOCKET s, std::vector<char>& out) {
+static bool ReadOnePacket(SOCKET s, std::vector<char>& out) 
+{
     PacketHeader hdr{};
     int r = RecvAll(s, reinterpret_cast<char*>(&hdr), sizeof(hdr));
     if (r <= 0) return false;
 
-    if (hdr.size < sizeof(hdr)) {
+    if (hdr.size < sizeof(hdr)) 
+    {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::cerr << "잘못된 패킷 크기: " << hdr.size << std::endl;
         return false;
@@ -77,43 +90,94 @@ static bool ReadOnePacket(SOCKET s, std::vector<char>& out) {
     memcpy(out.data(), &hdr, sizeof(hdr));
 
     int remain = static_cast<int>(hdr.size) - static_cast<int>(sizeof(hdr));
-    if (remain > 0) {
+    if (remain > 0) 
+    {
         r = RecvAll(s, out.data() + sizeof(hdr), remain);
         if (r <= 0) return false;
     }
     return true;
 }
 
+static std::string g_inputSnapshot; // 현재 사용자가 타이핑 중인 내용
+static const std::string kPrompt = "> ";
+
+static void RenderPrompt()
+{
+    std::lock_guard<std::mutex> lk(g_coutMtx);
+    std::cout << "\r\x1b[2K" << kPrompt << g_inputSnapshot;
+    std::cout.flush();
+}
+
+// 수신 스레드가 대화 한 줄을 찍을 때 사용
+static void SafePrintChatLine(const std::string& line)
+{
+    std::lock_guard<std::mutex> lk(g_coutMtx);
+    std::cout << "\r\x1b[2K" << line << "\n"; // 먼저 수신 메시지 출력
+    std::cout << kPrompt << g_inputSnapshot;  // 그 다음 프롬프트 + 입력 복원
+    std::cout.flush();
+}
+
+
 // -------------------- 채팅 입력 루프 --------------------
-static void ChatLoop(SOCKET sock, std::atomic<bool>& running) {
+static void ChatLoop(SOCKET sock, std::atomic<bool>& running)
+{
+    g_inputSnapshot.clear();
+    RenderPrompt();
+
+    while (running.load())
     {
-        std::lock_guard<std::mutex> lk(g_coutMtx);
-        std::cout << "이제 채팅을 입력하세요. 종료는 /quit\n";
-    }
-    for (std::string line; running.load() && std::getline(std::cin, line); ) {
-        if (line == "/quit") {
-            running.store(false);
-            break;
-        }
+        if (!_kbhit()) { std::this_thread::sleep_for(std::chrono::milliseconds(8)); continue; }
 
-        CP_CHAT pkt{};
-        pkt._header.id = CM_CHAT;
-        std::strncpy(pkt._chat, line.c_str(), sizeof(pkt._chat) - 1);
-        pkt._header.size = sizeof(pkt);
+        wchar_t ch = _getwch();
 
-        int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
-        if (sent == SOCKET_ERROR) {
-            std::lock_guard<std::mutex> lk(g_coutMtx);
-            std::cerr << "send 실패: " << WSAGetLastError() << "\n";
-            running.store(false);
-            break;
+        // Enter: 전송
+        if (ch == L'\r' || ch == L'\n')
+        {
+            std::string line = g_inputSnapshot;
+            g_inputSnapshot.clear();
+
+            ClearCurrentLine();
+
+            if (line == "/quit") { running.store(false); break; }
+
+            CP_CHAT pkt{};
+            pkt._header.id = CM_CHAT;
+            std::strncpy(pkt._chat, line.c_str(), sizeof(pkt._chat) - 1);
+            pkt._header.size = sizeof(pkt);
+
+            int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
+            if (sent == SOCKET_ERROR)
+            {
+                std::lock_guard<std::mutex> lk(g_coutMtx);
+                std::cerr << "send 실패: " << WSAGetLastError() << "\n";
+                running.store(false);
+                break;
+            }
+
+            RenderPrompt();
         }
-        else {
-            // 내가 친 입력 줄 지우기
-            ClearLastInputLine();
+        // Backspace
+        else if (ch == 8 /*Backspace*/)
+        {
+            if (!g_inputSnapshot.empty())
+            {
+                g_inputSnapshot.pop_back();
+                RenderPrompt();
+            }
         }
+        // 일반 인쇄 문자
+        else if (iswprint(ch))
+        {
+            if (ch < 128) // 간단히 ASCII만 허용(원하면 확장 가능)
+            {
+                g_inputSnapshot.push_back(static_cast<char>(ch));
+                RenderPrompt();
+            }
+        }
+        // 그 외 키(화살표 등) 필요 시 확장 가능
     }
 }
+
 
 int main() {
     // 콘솔 VT 모드 활성 시도
@@ -121,7 +185,8 @@ int main() {
 
     // 1) WinSock 시작
     WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) 
+    {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::cerr << "WSAStartup 실패\n";
         return -1;
@@ -129,7 +194,8 @@ int main() {
 
     // 2) 소켓 생성
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET) {
+    if (sock == INVALID_SOCKET) 
+    {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::cerr << "socket 생성 실패\n";
         WSACleanup();
@@ -146,7 +212,8 @@ int main() {
     serverAddr.sin_port = htons(GATE_PORT);          // 프로젝트 상수
     inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
-    if (connect(sock, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (connect(sock, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) 
+    {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::cerr << "서버 연결 실패: " << WSAGetLastError() << "\n";
         closesocket(sock);
@@ -163,10 +230,13 @@ int main() {
     std::atomic<bool> loggedIn{ false };
 
     // 5) 수신 스레드: 서버에서 오는 패킷 처리
-    std::thread recvThread([&]() {
-        while (running.load()) {
+    std::thread recvThread([&](){
+        while (running.load()) 
+        {
             std::vector<char> recvBuf;
-            if (!ReadOnePacket(sock, recvBuf)) {
+            if (!ReadOnePacket(sock, recvBuf)) 
+            {
+
                 std::lock_guard<std::mutex> lk(g_coutMtx);
                 std::cerr << "연결 종료/수신 에러\n";
                 running.store(false);
@@ -175,7 +245,8 @@ int main() {
 
             const PacketHeader* h = reinterpret_cast<const PacketHeader*>(recvBuf.data());
 
-            if (h->id == SM_LOGIN && recvBuf.size() >= sizeof(SP_LOGIN)) {
+            if (h->id == SM_LOGIN && recvBuf.size() >= sizeof(SP_LOGIN)) 
+            {
                 const SP_LOGIN* p = reinterpret_cast<const SP_LOGIN*>(recvBuf.data());
                 loggedIn.store(true);
                 std::lock_guard<std::mutex> lk(g_coutMtx);
@@ -183,15 +254,16 @@ int main() {
                 std::cout << "[LOGIN OK] id=" << p->_ui64id << ", name=" << p->_name << "\n";
                 std::cout << "----------------------------------------\n";
             }
-            else if (h->id == SM_CHAT && recvBuf.size() >= sizeof(SP_CHAT)) {
+            else if (h->id == SM_CHAT && recvBuf.size() >= sizeof(SP_CHAT)) 
+            {
                 const SP_CHAT* p = reinterpret_cast<const SP_CHAT*>(recvBuf.data());
-                std::lock_guard<std::mutex> lk(g_coutMtx);
-                if(p->_ui64id == ui64Id)
-                    std::cout << "[CHAT][ME] " << p->_name << " : " << p->_chat << "\n";
+                if (p->_ui64id == ui64Id)
+                    SafePrintChatLine(std::string("[CHAT][ME] ") + p->_name + " : " + p->_chat);
                 else
-                    std::cout << "[CHAT] " << p->_name << " : " << p->_chat << "\n";
+                    SafePrintChatLine(std::string("[CHAT] ") + p->_name + " : " + p->_chat);
             }
-            else {
+            else 
+            {
                 std::lock_guard<std::mutex> lk(g_coutMtx);
                 std::cout << "[서버 응답] id=" << h->id << ", size=" << h->size << " (처리 대상 아님)\n";
             }
@@ -204,36 +276,46 @@ int main() {
         std::cout << "채팅에 참여하려면 닉네임을 입력하세요 : ";
     }
     std::string nameLine;
-    if (!std::getline(std::cin, nameLine)) {
+    if (!std::getline(std::cin, nameLine)) 
+    {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::cerr << "입력이 취소되었습니다.\n";
         running.store(false);
     }
-    else if (running.load()) {
+    else if (running.load()) 
+    {
         CP_LOGIN pkt{};
         std::strncpy(pkt._name, nameLine.c_str(), sizeof(pkt._name) - 1);
 
         int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
-        if (sent == SOCKET_ERROR) {
+        if (sent == SOCKET_ERROR) 
+        {
             std::lock_guard<std::mutex> lk(g_coutMtx);
             std::cerr << "send 실패: " << WSAGetLastError() << "\n";
             running.store(false);
         }
-        else {
+        else 
+        {
             // 닉네임 입력 줄 삭제
-            ClearLastInputLine();
-            std::lock_guard<std::mutex> lk(g_coutMtx);
-            std::cout << "로그인 요청 전송… 서버 응답 대기 중\n";
+           // 닉네임 전송 성공 후
+            ClearCurrentLine();
+            {
+                std::lock_guard<std::mutex> lk(g_coutMtx);
+                std::cout << "로그인 요청 전송… 서버 응답 대기 중\n";
+            }
+
         }
     }
 
     // 7) 로그인 완료될 때까지 대기
-    while (running.load() && !loggedIn.load()) {
+    while (running.load() && !loggedIn.load()) 
+    {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     // 8) 로그인 성공했으면 채팅 루프 시작
-    if (running.load() && loggedIn.load()) {
+    if (running.load() && loggedIn.load()) 
+    {
         ChatLoop(sock, running);
     }
 
