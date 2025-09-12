@@ -7,7 +7,7 @@
 
 // 포트 고정값 (테스트용)
 #define DEFAULT_PORT         7777
-#define GATE_PORT         14001
+#define GATE_PORT         14002
 
 // 로그 및 디버그 매크로
 #define LOG(x) std::cout << x << std::endl;
@@ -22,7 +22,8 @@
 #define MAX_PACKET_SIZE UINT16_MAX
 #define MAX_RECV_BUFFER_SIZE (8192)
 
-#define MAX_NICKNAME_LENGTH 256
+#define MAX_ID_LENGTH 300
+#define MAX_PW_LENGTH 300
 #define MAX_CHAT_LENGTH 1000
 
 #define POOL_SIZE_PC	100

@@ -5,6 +5,8 @@
 #include "IocpCore.h"
 #include "GamePacketHandler.h"
 #include "GameManager.h"
+#include "DBManager.h"
+#include "DBConfigReader.h"
 
 
 void InitGateHandlers()
@@ -17,12 +19,29 @@ void InitGateHandlers()
 
 int main()
 {
-    // 1. IOCP Core 초기화
+    // 0) db.ini 로드
+    DBConfigReader dbcfg;
+    if (!dbcfg.Load())
+    {
+        std::wcerr << L"[ERROR] db.ini 로딩 실패\n";
+        return -1;
+    }
+    const DBConfig& db = dbcfg.DB();
+
+
+    // 1-1. IOCP Core 초기화
     IocpCore& iocp = IocpCore::GetInstance();
     if (!iocp.Initialize())
     {
         ERROR_LOG("IOCP 초기화 실패");
         return -1;
+    }
+
+    // 1-2. DB 초기화 및 연결
+    if (!DBManager::Instance().Initialize(db.connStr, db.poolSize, db.healthSec))
+    {
+        std::cerr << "[ERROR] DBManager 초기화 실패\n";
+        return -2;
     }
 
     //2. SessionManager에 Session 생성 로직 주입
@@ -56,6 +75,8 @@ int main()
     // 7. 종료 처리
     iocp.ShutDown();
     WSACleanup();
+    DBManager::Instance().Finalize();
+
 
     return 0;
 }

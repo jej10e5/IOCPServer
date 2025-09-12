@@ -2,6 +2,7 @@
 #include "../ServerCommon/pch.h"
 #include "PacketDispatcher.h"
 #include "PacketID.h"
+#include "../ServerCommon/Utils.h"
 class Session;
 class GamePacketHandler
 {

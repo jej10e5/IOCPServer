@@ -23,7 +23,7 @@
 // -------------------- 전역 동기화/VT 모드 --------------------
 std::mutex g_coutMtx;
 std::atomic<bool> g_vtEnabled{ false };
-UINT64 ui64Id = 0;
+INT64 i64Unique = 0;
 
 // -------------------- VT 모드 --------------------
 static bool EnableVTMode()
@@ -143,61 +143,48 @@ static void SafePrintChatLineW(const std::wstring& line)
 }
 
 // -------------------- 채팅 입력 루프(키 단위/비차단) --------------------
-static void ChatLoop(SOCKET sock, std::atomic<bool>& running)
+// 기존 ChatLoop 제거하고 이 함수로 교체
+static void ChatLoop_LineMode(SOCKET sock, std::atomic<bool>& running)
 {
-    g_inputSnapshotW.clear();
-    RenderPromptW();
-
     while (running.load())
     {
-        if (!_kbhit()) { std::this_thread::sleep_for(std::chrono::milliseconds(8)); continue; }
-
-        wchar_t ch = _getwch();
-
-        if (ch == L'\r' || ch == L'\n')
         {
-            std::wstring wline = g_inputSnapshotW;
-            g_inputSnapshotW.clear();
-            ClearCurrentLine();
-
-            if (wline == L"/quit") { running.store(false); break; }
-
-            // UTF-8로 변환 후 전송
-            std::string utf8 = WideToUtf8(wline);
-
-            CP_CHAT pkt{};
-            pkt._header.id = CM_CHAT;
-            std::strncpy(pkt._chat, utf8.c_str(), sizeof(pkt._chat)-1);
-            pkt._header.size = sizeof(pkt);
-
-            int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
-            if (sent == SOCKET_ERROR)
-            {
-                std::lock_guard<std::mutex> lk(g_coutMtx);
-                std::wcerr << L"send 실패: " << WSAGetLastError() << L"\n";
-                running.store(false);
-                break;
-            }
-
-            RenderPromptW();
+            std::lock_guard<std::mutex> lk(g_coutMtx);
+            std::wcout << L"> " << std::flush;
         }
-        else if (ch == 8 /*Backspace*/)
+
+        std::wstring wline;
+        if (!std::getline(std::wcin, wline)) 
         {
-            if (!g_inputSnapshotW.empty())
-            {
-                g_inputSnapshotW.pop_back();
-                RenderPromptW();
-            }
+            // 입력 스트림 종료(콘솔 닫힘 등)
+            running.store(false);
+            break;
         }
-        else if (iswprint(ch))
+
+        if (wline == L"/quit") {
+            running.store(false);
+            break;
+        }
+
+        // UTF-8 변환 후 전송
+        std::string utf8 = WideToUtf8(wline);
+
+        CP_CHAT pkt{};
+        pkt._header.id = CM_CHAT;
+        pkt._header.size = sizeof(pkt);
+        std::strncpy(pkt._chat, utf8.c_str(), sizeof(pkt._chat) - 1);
+
+        int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
+        if (sent == SOCKET_ERROR)
         {
-            // 조합 완료된 유니코드 문자를 그대로 누적
-            g_inputSnapshotW.push_back(ch);
-            RenderPromptW();
+            std::lock_guard<std::mutex> lk2(g_coutMtx);
+            std::wcerr << L"send 실패: " << WSAGetLastError() << L"\n";
+            running.store(false);
+            break;
         }
-        // 화살표 등 기타 키는 필요 시 추가 처리
     }
 }
+
 
 // -------------------- main --------------------
 int main()
@@ -278,22 +265,32 @@ int main()
                 if (h->id == SM_LOGIN && recvBuf.size() >= sizeof(SP_LOGIN))
                 {
                     const SP_LOGIN* p = reinterpret_cast<const SP_LOGIN*>(recvBuf.data());
-                    loggedIn.store(true);
-                    ui64Id = p->_ui64id;
+                    if (p->_i32Result != 0)
+                    {
+                        std::wcout << L"------------------로그인 실패--------------------\n";
+                        return 0;
+                    }
 
-                    std::wstring nameW = Utf8ToWide(p->_name);
+                    loggedIn.store(true);
+                    i64Unique = p->_i64Unique;
+
+                    std::wstring idW = Utf8ToWide(p->_id);
+                    std::wstring pwW = Utf8ToWide(p->_pw);
 
                     std::lock_guard<std::mutex> lk(g_coutMtx);
-                    std::wcout << L"[LOGIN OK] id=" << p->_ui64id << L", name=" << nameW << L"\n";
+                    std::wcout << L"[LOGIN OK] unique=" << p->_i64Unique
+                        << L", id=" << idW
+                        << L", pw=" << pwW << L"\n";
                     std::wcout << L"----------------------------------------\n";
                 }
+
                 else if (h->id == SM_CHAT && recvBuf.size() >= sizeof(SP_CHAT))
                 {
                     const SP_CHAT* p = reinterpret_cast<const SP_CHAT*>(recvBuf.data());
-                    std::wstring nameW = Utf8ToWide(p->_name);
+                    std::wstring nameW = Utf8ToWide(p->_id);
                     std::wstring chatW = Utf8ToWide(p->_chat);
 
-                    if (p->_ui64id == ui64Id)
+                    if (p->_i64Unique == i64Unique)
                         SafePrintChatLineW(L"[CHAT][ME] " + nameW + L" : " + chatW);
                     else
                         SafePrintChatLineW(L"[CHAT] " + nameW + L" : " + chatW);
@@ -306,25 +303,41 @@ int main()
             }
         });
 
-    // 6) 로그인 한 번만 입력/전송 (wide 입력 사용)
+    // 6) 로그인 입력 (id + pw)
     {
         std::lock_guard<std::mutex> lk(g_coutMtx);
-        std::wcout << L"채팅에 참여하려면 닉네임을 입력하세요 : ";
+        std::wcout << L"아이디 입력: ";
     }
-
-    std::wstring nameLineW;
-    if (!std::getline(std::wcin, nameLineW))
+    std::wstring idLineW;
+    if (!std::getline(std::wcin, idLineW))
     {
         std::lock_guard<std::mutex> lk(g_coutMtx);
         std::wcerr << L"입력이 취소되었습니다.\n";
         running.store(false);
     }
-    else if (running.load())
+
+    std::wstring pwLineW;
+    if (running.load())
     {
-        std::string utf8name = WideToUtf8(nameLineW);
+        std::lock_guard<std::mutex> lk(g_coutMtx);
+        std::wcout << L"비밀번호 입력: ";
+    }
+    if (running.load() && !std::getline(std::wcin, pwLineW))
+    {
+        std::lock_guard<std::mutex> lk(g_coutMtx);
+        std::wcerr << L"입력이 취소되었습니다.\n";
+        running.store(false);
+    }
+
+    // 7) 패킷 전송
+    if (running.load())
+    {
+        std::string utf8id = WideToUtf8(idLineW);
+        std::string utf8pw = WideToUtf8(pwLineW);
 
         CP_LOGIN pkt{};
-        std::strncpy(pkt._name, utf8name.c_str(), sizeof(pkt._name) - 1);
+        std::strncpy(pkt._id, utf8id.c_str(), sizeof(pkt._id) - 1);
+        std::strncpy(pkt._pw, utf8pw.c_str(), sizeof(pkt._pw) - 1);
 
         int sent = send(sock, reinterpret_cast<const char*>(&pkt), pkt._header.size, 0);
         if (sent == SOCKET_ERROR)
@@ -336,12 +349,11 @@ int main()
         else
         {
             ClearCurrentLine();
-            {
-                std::lock_guard<std::mutex> lk(g_coutMtx);
-                std::wcout << L"로그인 요청 전송… 서버 응답 대기 중\n";
-            }
+            std::lock_guard<std::mutex> lk(g_coutMtx);
+            std::wcout << L"로그인 요청 전송… 서버 응답 대기 중\n";
         }
     }
+
 
     // 7) 로그인 완료될 때까지 대기
     while (running.load() && !loggedIn.load())
@@ -349,7 +361,8 @@ int main()
 
     // 8) 로그인 성공했으면 채팅 루프 시작
     if (running.load() && loggedIn.load())
-        ChatLoop(sock, running);
+        ChatLoop_LineMode(sock, running);
+
 
     // 9) 정리
     running.store(false);

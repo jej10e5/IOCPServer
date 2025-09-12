@@ -45,10 +45,12 @@ struct CP_LOGIN
 	{
 		_header.id = CM_LOGIN;
 		_header.size = sizeof(CP_LOGIN);
-		memset(&_name, 0x00, sizeof(_name));
+		memset(&_id, 0x00, sizeof(_id));
+		memset(&_pw, 0x00, sizeof(_pw));
 	}
 	PacketHeader _header;
-	char _name[MAX_NICKNAME_LENGTH];
+	char _id[MAX_ID_LENGTH];
+	char _pw[MAX_PW_LENGTH];
 };
 #pragma pack(pop)
 
@@ -59,12 +61,16 @@ struct SP_LOGIN
 	{
 		_header.id = SM_LOGIN;
 		_header.size = sizeof(SP_LOGIN);
-		memset(&_ui64id, 0x00, sizeof(_ui64id));
-		memset(&_name, 0x00, sizeof(_name));
+		memset(&_i32Result, 0x00, sizeof(_i32Result));
+		memset(&_i64Unique, 0x00, sizeof(_i64Unique));
+		memset(&_id, 0x00, sizeof(_id));
+		memset(&_pw, 0x00, sizeof(_pw));
 	}
 	PacketHeader _header;
-	UINT64 _ui64id;
-	char _name[MAX_NICKNAME_LENGTH];
+	INT32 _i32Result;
+	INT64 _i64Unique;
+	char _id[MAX_ID_LENGTH];
+	char _pw[MAX_PW_LENGTH];
 };
 #pragma pack(pop)
 
@@ -91,13 +97,13 @@ struct SP_CHAT
 	{
 		_header.id = SM_CHAT;
 		_header.size = sizeof(SP_CHAT);
-		memset(&_ui64id, 0x00, sizeof(_ui64id));
-		memset(&_name, 0x00, sizeof(_name));
+		memset(&_i64Unique, 0x00, sizeof(_i64Unique));
+		memset(&_id, 0x00, sizeof(_id));
 		memset(&_chat, 0x00, sizeof(_chat));
 	}
 	PacketHeader _header;
-	UINT64 _ui64id;
-	char _name[MAX_NICKNAME_LENGTH];
+	INT64 _i64Unique;
+	char _id[MAX_ID_LENGTH];
 	char _chat[MAX_CHAT_LENGTH];
 };
 #pragma pack(pop)

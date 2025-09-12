@@ -149,13 +149,13 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 	//  - 커널에게 이 소켓은 이 리슨 소켓을 통해 accept된거라고 알려주는 역할
 	//  - 그래야 커널이 해당 소켓 리소스를 정리할 타이밍을 제대로 계산
 	INT32 i32OptResult = setsockopt(m_AcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSock, sizeof(SOCKET));
-	SessionManager& sessionManager = SessionManager::GetInstance();
+
 	if (i32OptResult == SOCKET_ERROR)
 	{
 		ERROR_LOG("setsockopt  SO_UPDATE_ACCEPT_CONTEXT  실패 : " << WSAGetLastError());
 
 		closesocket(m_AcceptSocket);
-		sessionManager.Release(m_eSessionType, this);
+		g_SessionManager.Release(m_eSessionType, this);
 		return;
 	}
 
@@ -164,11 +164,11 @@ void Session::OnAcceptCompleted(IocpContext* _pContext)
 	{
 		ERROR_LOG("소켓 IOCP 등록 실패");
 		closesocket(m_AcceptSocket);
-		sessionManager.Release(m_eSessionType, this);
+		g_SessionManager.Release(m_eSessionType, this);
 		return;
 	}
 
-	m_ui64SessionId = sessionManager.RegisterActive(this);
+	m_ui64SessionId = g_SessionManager.RegisterActive(this);
 	LOG("클라이언트 접속 완료 (token = " << m_ui64SessionId << ")");
 
 

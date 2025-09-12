@@ -40,9 +40,10 @@ void CGameManager::RunLoop()
 	using clock = std::chrono::steady_clock;
 	auto next = clock::now();
 
-	while (m_bRunning) {
+	while (m_bRunning) 
+	{
 		// 1) 네트워크/다른 스레드에서 올라온 일을 게임 스레드에서 처리
-		GameDispatcher::Instance().Drain(2000); // 프레임당 처리 한도
+		GameDispatcher::GetInstance().Drain(2000); // 프레임당 처리 한도
 
 		// 2) 도메인 틱
 		// 루프 돌릴거 있으면 여기서 돌리기
@@ -53,19 +54,19 @@ void CGameManager::RunLoop()
 	}
 
 	// 종료 직전 남은 작업 한 번 더 비우고 싶으면:
-	GameDispatcher::Instance().Drain(100000);
+	GameDispatcher::GetInstance().Drain(100000);
 }
 
-void CGameManager::Login(Session* _pSession, char* _pName)
+void CGameManager::Login(Session* _pSession, const INT64 _ui64Unique, const char* _pName)
 {
 	std::scoped_lock lk(m_UserMtx);
 	auto pClient = GetEmptyPC();
 	pClient->SetName(_pName);
-	pClient->SetId(_pSession->GetSessionId());
-
+	pClient->SetSessionId(_pSession->GetSessionId());
+	pClient->SetUnique(_ui64Unique);
 	// GameManager.cpp - 로그인 시 콜백 설정 부분
 	_pSession->SetOnDisconnect([this](UINT64 sid) {
-		GameDispatcher::Instance().Post([this, sid] {
+		GameDispatcher::GetInstance().Post([this, sid] {
 			this->Logout(sid);
 			});
 		});
@@ -93,7 +94,18 @@ CUnitPC* CGameManager::FindUserById(UINT64 _ui64Id)
 {
 	for (auto user : m_Users)
 	{
-		if (user->GetId() == _ui64Id)
+		if (user->GetSessionId() == _ui64Id)
+			return user;
+	}
+
+	return nullptr;
+}
+
+CUnitPC* CGameManager::FindUserByUnique(INT64 _i64unique)
+{
+	for (auto user : m_Users)
+	{
+		if (user->GetUnique() == _i64unique)
 			return user;
 	}
 

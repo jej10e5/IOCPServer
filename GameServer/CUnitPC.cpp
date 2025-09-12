@@ -2,11 +2,11 @@
 
 void CUnitPC::Init()
 {
-	m_ui64Id = 0;
+	m_ui64SessionId = 0;
 	memset(m_cName, 0x00, sizeof(m_cName));
 }
 
-void CUnitPC::SetName(char* _pName)
+void CUnitPC::SetName(const char* _pName)
 {
 	memcpy(m_cName, _pName, sizeof(m_cName));
 	m_cName[255] = 0;

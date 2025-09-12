@@ -65,7 +65,7 @@ SessionType SessionManager::StringToSessionType(const std::wstring& typeStr)
 UINT64 SessionManager::RegisterActive(Session* _pSession)
 {
 	const UINT64 t = m_ui64NextToken.fetch_add(1, std::memory_order_relaxed);
-	std::lock_guard<std::mutex> g(m_SessionLock);
+	std::lock_guard<std::mutex> g(m_ActiveLock);
 	m_ActiveSessions[t] = _pSession;
 	return t;
 }

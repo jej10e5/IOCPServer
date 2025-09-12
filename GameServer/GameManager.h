@@ -15,9 +15,10 @@ public:
 	void Init();
 	bool StartLoop(std::chrono::milliseconds tick = std::chrono::milliseconds(50)); // 20TPS
 	void StopLoop();
-	void Login(Session* _pSession, char* _pName);
+	void Login(Session* _pSession, const INT64 _ui64Unique, const char* _pName);
 	void Logout(UINT64 _ui64Id);
 	CUnitPC* FindUserById(UINT64 _ui64Id);
+	CUnitPC* FindUserByUnique(INT64 _i64unique);
 	CUnitPC* GetEmptyPC();
 	void ReleasePC(CUnitPC* _pUser);
 

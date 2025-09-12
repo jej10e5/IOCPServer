@@ -7,6 +7,7 @@
     <ClInclude Include="PacketID.h" />
     <ClInclude Include="PacketStruct.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

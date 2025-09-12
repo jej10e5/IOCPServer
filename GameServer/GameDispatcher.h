@@ -3,10 +3,10 @@
 #include "../ServerCommon/pch.h"
 #include <functional>
 #include "Singleton.h"
-class GameDispatcher : Singleton<GameDispatcher>
+class GameDispatcher : public Singleton<GameDispatcher>
 {
 public:
-    static GameDispatcher& Instance() { static GameDispatcher i; return i; }
+   // static GameDispatcher& Instance() { static GameDispatcher i; return i; }
 
     void Post(function<void()> f) {
         lock_guard<mutex> lock(m_mtx);
@@ -27,6 +27,18 @@ public:
             job(); // 게임 로직 스레드에서 실행됨
         }
     }
+
+
+    inline void PostToGameThread(std::function<void()> fn)
+    {
+        if (!fn)
+        {
+            return;
+        }
+        GameDispatcher::GetInstance().Post(std::move(fn));
+    }
+
+
 
 private:
     mutex m_mtx;
