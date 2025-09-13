@@ -22,7 +22,7 @@ public:
 private:
 	struct ListnerInfo
 	{
-		Listener listener;
+		unique_ptr<Listener> listener;
 		SessionType sessionType;
 	};
 

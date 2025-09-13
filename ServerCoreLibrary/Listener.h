@@ -3,6 +3,7 @@
 #include "SessionType.h"
 #include "Session.h"
 #include <functional>
+struct AcceptCtx;
 class Listener
 {
 public:
@@ -12,6 +13,7 @@ public:
 	using SessionFactory = std::function<Session* ()>;
 	bool Init(UINT16 _port);
 	bool PostAccept(SessionType _eType);
+	void OnAcceptCompleted(AcceptCtx* _pCtx, DWORD _dwBytes);
 	SOCKET GetListenSocket() const { return m_ListenSocket; }
 
 private:

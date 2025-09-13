@@ -66,6 +66,36 @@ static void ClearCurrentLine()
     }
 }
 
+
+// -------------------- 이전 줄(프롬프트+입력) 지우기 --------------------
+static void ErasePrevEchoLine()
+{
+    std::lock_guard<std::mutex> lk(g_coutMtx);
+
+    if (g_vtEnabled.load())
+    {
+        // 한 줄 위로 이동 -> 해당 줄 지우기
+        std::wcout << L"\x1b[1A\r\x1b[2K";
+        std::wcout.flush();
+    }
+    else
+    {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_SCREEN_BUFFER_INFO csbi{};
+        if (!GetConsoleScreenBufferInfo(hOut, &csbi))
+            return;
+
+        SHORT curY = csbi.dwCursorPosition.Y;
+        SHORT targetY = (curY > 0) ? curY - 1 : curY; // 맨 위면 현재 줄만
+        COORD pos{ 0, targetY };
+
+        DWORD written = 0;
+        FillConsoleOutputCharacterW(hOut, L' ', csbi.dwSize.X, pos, &written);
+        SetConsoleCursorPosition(hOut, pos);
+    }
+}
+
+
 // -------------------- UTF-8 <-> UTF-16 변환 --------------------
 static std::string WideToUtf8(const std::wstring& w)
 {
@@ -143,7 +173,6 @@ static void SafePrintChatLineW(const std::wstring& line)
 }
 
 // -------------------- 채팅 입력 루프(키 단위/비차단) --------------------
-// 기존 ChatLoop 제거하고 이 함수로 교체
 static void ChatLoop_LineMode(SOCKET sock, std::atomic<bool>& running)
 {
     while (running.load())
@@ -154,19 +183,18 @@ static void ChatLoop_LineMode(SOCKET sock, std::atomic<bool>& running)
         }
 
         std::wstring wline;
-        if (!std::getline(std::wcin, wline)) 
+        if (!std::getline(std::wcin, wline))
         {
-            // 입력 스트림 종료(콘솔 닫힘 등)
             running.store(false);
             break;
         }
 
-        if (wline == L"/quit") {
+        if (wline == L"/quit")
+        {
             running.store(false);
             break;
         }
 
-        // UTF-8 변환 후 전송
         std::string utf8 = WideToUtf8(wline);
 
         CP_CHAT pkt{};
@@ -181,6 +209,11 @@ static void ChatLoop_LineMode(SOCKET sock, std::atomic<bool>& running)
             std::wcerr << L"send 실패: " << WSAGetLastError() << L"\n";
             running.store(false);
             break;
+        }
+        else
+        {
+            ErasePrevEchoLine();
+
         }
     }
 }

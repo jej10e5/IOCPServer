@@ -20,7 +20,6 @@
     <ClCompile Include="ConfigReader.cpp">
       <Filter>etc</Filter>
     </ClCompile>
-    <ClCompile Include="ServerManager.cpp" />
     <ClCompile Include="ClientSession.cpp">
       <Filter>Session</Filter>
     </ClCompile>
@@ -57,7 +56,6 @@
     <ClInclude Include="ConfigReader.h">
       <Filter>etc</Filter>
     </ClInclude>
-    <ClInclude Include="ServerManager.h" />
     <ClInclude Include="ClientSession.h">
       <Filter>Session</Filter>
     </ClInclude>

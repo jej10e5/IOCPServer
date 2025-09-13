@@ -129,7 +129,6 @@ bool DBManager::Call_CheckToken(db::Conn& conn, const char* id, const char* pw, 
         return false;
     }
 
-    // char* → std::wstring 변환 (UTF-8 기준, 필요시 CP_ACP로 조정)
     int lenId = MultiByteToWideChar(CP_UTF8, 0, id, -1, nullptr, 0);
     std::wstring wid(lenId, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, id, -1, wid.data(), lenId);

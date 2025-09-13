@@ -9,6 +9,6 @@ public:
 		Init(SessionType::GAME);
 	};
 
-	void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) override;
+	void OnRecvCompleted(RecvCtx* _pContext, DWORD _dwRecvLen) override;
 };
 

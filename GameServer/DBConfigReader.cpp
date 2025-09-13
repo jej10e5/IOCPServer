@@ -12,7 +12,7 @@ namespace
     static bool IsSpace(wchar_t c) { return c == L' ' || c == L'\t' || c == L'\r' || c == L'\n'; }
 }
 
-std::wstring DBConfigReader::Trim(std::wstring s)
+std::wstring CDBConfigReader::Trim(std::wstring s)
 {
     auto itL = std::find_if_not(s.begin(), s.end(), IsSpace);
     auto itR = std::find_if_not(s.rbegin(), s.rend(), IsSpace).base();
@@ -29,7 +29,7 @@ std::wstring DBConfigReader::Trim(std::wstring s)
     return s;
 }
 
-std::wstring DBConfigReader::ReadString(const std::wstring& section,
+std::wstring CDBConfigReader::ReadString(const std::wstring& section,
     const std::wstring& key,
     const std::wstring& def,
     const std::wstring& path)
@@ -46,7 +46,7 @@ std::wstring DBConfigReader::ReadString(const std::wstring& section,
     return Trim(v);
 }
 
-int DBConfigReader::ReadInt(const std::wstring& section,
+int CDBConfigReader::ReadInt(const std::wstring& section,
     const std::wstring& key,
     int def,
     const std::wstring& path)
@@ -57,7 +57,7 @@ int DBConfigReader::ReadInt(const std::wstring& section,
         path.c_str()));
 }
 
-bool DBConfigReader::Load(const std::wstring& path)
+bool CDBConfigReader::Load(const std::wstring& path)
 {
     // 1) ini 경로 결정: 입력 path가 비었으면 실행 파일 폴더의 db.ini 사용
     if (!path.empty())
@@ -91,7 +91,7 @@ bool DBConfigReader::Load(const std::wstring& path)
     return Validate();
 }
 
-void DBConfigReader::ApplyDefaults()
+void CDBConfigReader::ApplyDefaults()
 {
     if (m_db.poolSize < 1) { m_db.poolSize = 1; }
     if (m_db.poolSize > 64) { m_db.poolSize = 64; }
@@ -103,7 +103,7 @@ void DBConfigReader::ApplyDefaults()
     if (m_db.queryTimeoutSec > 120) { m_db.queryTimeoutSec = 120; }
 }
 
-bool DBConfigReader::Validate() const
+bool CDBConfigReader::Validate() const
 {
     if (m_db.connStr.empty())
     {

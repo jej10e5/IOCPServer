@@ -15,10 +15,10 @@ void Session::Init(SessionType _eType)
 }
 bool Session::Recv()
 {
-   // 1. IocpContext 생성
-	IocpContext* pContext = new IocpContext;
-	ZeroMemory(pContext, sizeof(IocpContext));
-   // 3. operation을 IocpOperation::RECV으로 설정
+   // IocpContext 생성
+	RecvCtx* pContext = new RecvCtx;
+	ZeroMemory(pContext, sizeof(RecvCtx));
+   // operation을 IocpOperation::RECV으로 설정
 	pContext->eOperation = IocpOperation::RECV; // 받았음
 	pContext->pSession = this;
 	pContext->tWsaBuf.buf = pContext->cBuffer; // 버퍼의 주소값
@@ -33,13 +33,10 @@ bool Session::Recv()
 		return false;
 	}
 
-	//LOG("WSARecv 버퍼 주소: " << static_cast<void*>(pContext->tWsaBuf.buf));
-	//LOG("WSARecv OVERLAPPED 주소: " << static_cast<void*>(pContext));
-   // 2. WSABUF 설정
-   // 4. WSARecv 호출
-	INT32 i32result = WSARecv(m_AcceptSocket, &pContext->tWsaBuf, 1, &dwRecvBytes, &dwFlags, pContext, nullptr);
+   // WSARecv 호출
+	INT32 i32result = WSARecv(m_AcceptSocket, &pContext->tWsaBuf, 1, &dwRecvBytes, &dwFlags, &pContext->ov, nullptr);
 
-	// 5. 실패 시 처리 (WSA_IO_PENDING은 정상으로 간주)
+	// 실패 시 처리 (WSA_IO_PENDING은 정상으로 간주)
 	if (i32result == SOCKET_ERROR)
 	{
 		INT32 i32Error = WSAGetLastError();
@@ -53,6 +50,8 @@ bool Session::Recv()
 
 	return true;
 }
+
+
 bool Session::Send(const char* _pData, INT32 _i32Len)
 {
 	std::lock_guard<std::mutex> guard(m_SendLock);
@@ -62,8 +61,8 @@ bool Session::Send(const char* _pData, INT32 _i32Len)
 		return true;
 		
 	}
-	auto * pContext = new IocpContext();
-	ZeroMemory(pContext, sizeof(IocpContext));
+	auto * pContext = new SendCtx();
+	ZeroMemory(pContext, sizeof(SendCtx));
 	pContext->eOperation = IocpOperation::SEND;
 	pContext->pSession = this;
 
@@ -75,7 +74,7 @@ bool Session::Send(const char* _pData, INT32 _i32Len)
 
 	DWORD flags = 0;
 	DWORD bytes = 0;
-	int iRet = WSASend(m_AcceptSocket, &pContext->tWsaBuf, 1, &bytes, flags, pContext, NULL);
+	int iRet = WSASend(m_AcceptSocket, &pContext->tWsaBuf, 1, &bytes, flags, &pContext->ov, NULL);
 
 	if (iRet == SOCKET_ERROR)
 	{
@@ -140,46 +139,13 @@ void Session::OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen)
 
 }
 
-void Session::OnAcceptCompleted(IocpContext* _pContext)
+
+void Session::OnAccepted()
 {
-
-	NetworkManager& networkManager = NetworkManager::GetInstance();
-	SOCKET listenSock = m_ListenSocket;
-	// SO_UPDATE_ACCEPT_CONTEXT 설정하는 이유
-	//  - 커널에게 이 소켓은 이 리슨 소켓을 통해 accept된거라고 알려주는 역할
-	//  - 그래야 커널이 해당 소켓 리소스를 정리할 타이밍을 제대로 계산
-	INT32 i32OptResult = setsockopt(m_AcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&listenSock, sizeof(SOCKET));
-
-	if (i32OptResult == SOCKET_ERROR)
-	{
-		ERROR_LOG("setsockopt  SO_UPDATE_ACCEPT_CONTEXT  실패 : " << WSAGetLastError());
-
-		closesocket(m_AcceptSocket);
-		g_SessionManager.Release(m_eSessionType, this);
-		return;
-	}
-
-	IocpCore& iocpCore = IocpCore::GetInstance();
-	if (!iocpCore.RegisterSocket(m_AcceptSocket, reinterpret_cast<ULONG_PTR>(this)))
-	{
-		ERROR_LOG("소켓 IOCP 등록 실패");
-		closesocket(m_AcceptSocket);
-		g_SessionManager.Release(m_eSessionType, this);
-		return;
-	}
-
-	m_ui64SessionId = g_SessionManager.RegisterActive(this);
-	LOG("클라이언트 접속 완료 (token = " << m_ui64SessionId << ")");
-
-
-	if (!Recv())
-	{
-		ERROR_LOG("WSARecv 실패");
-	}
-	networkManager.AcceptListener(m_eSessionType);
+	m_bDisconnected.store(false);
+	m_ui64SessionId = SessionManager::GetInstance().RegisterActive(this);
 }
 
-// Session.cpp
 void Session::Disconnect()
 {
 	bool expected = false;

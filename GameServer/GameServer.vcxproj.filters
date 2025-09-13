@@ -7,6 +7,12 @@
     <Filter Include="DB">
       <UniqueIdentifier>{78e1d7a5-605f-4e22-9eb3-4ede8a006711}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UnitPC">
+      <UniqueIdentifier>{ad9b7ac1-1fbf-47aa-b80c-d35397b6a597}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="etc">
+      <UniqueIdentifier>{77d85cea-d3c6-4d19-8d4b-ae05cb1fec0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -14,9 +20,7 @@
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="GamePacketHandler.cpp" />
-    <ClCompile Include="CommandManager.cpp" />
     <ClCompile Include="GameManager.cpp" />
-    <ClCompile Include="CUnitPC.cpp" />
     <ClCompile Include="GameDispatcher.cpp" />
     <ClCompile Include="DBManager.cpp">
       <Filter>DB</Filter>
@@ -24,15 +28,19 @@
     <ClCompile Include="DBConfigReader.cpp">
       <Filter>DB</Filter>
     </ClCompile>
+    <ClCompile Include="CUnitPC.cpp">
+      <Filter>UnitPC</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandManager.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="GamePacketHandler.h" />
-    <ClInclude Include="CommandManager.h" />
     <ClInclude Include="GameManager.h" />
-    <ClInclude Include="CUnitPC.h" />
     <ClInclude Include="GameDispatcher.h" />
     <ClInclude Include="DBTypes.h">
       <Filter>DB</Filter>
@@ -42,6 +50,12 @@
     </ClInclude>
     <ClInclude Include="DBConfigReader.h">
       <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="CUnitPC.h">
+      <Filter>UnitPC</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandManager.h">
+      <Filter>etc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

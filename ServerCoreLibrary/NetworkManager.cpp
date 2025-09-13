@@ -6,8 +6,9 @@ void NetworkManager::Init(UINT16 _uiPort, SessionType _eType)
 {
     ListnerInfo info;
     info.sessionType = _eType;
+    info.listener = std::make_unique<Listener>();
 
-    if (!info.listener.Init(_uiPort))
+    if (!info.listener->Init(_uiPort))
     {
         ERROR_LOG("Failed to initialize listener on port: " << _uiPort);
         return;
@@ -23,7 +24,7 @@ void NetworkManager::Init(UINT16 _uiPort, SessionType _eType)
     constexpr int ACCEPT_BACKLOG = 64; // 필요시 128~256까지 늘려도 OK
     for (int i = 0; i < ACCEPT_BACKLOG; ++i)
     {
-        listener.PostAccept(_eType);
+        listener->PostAccept(_eType);
     }
 
     LOG("Listen started on port " << _uiPort << ", pre-posted accepts = " << ACCEPT_BACKLOG);
@@ -36,7 +37,7 @@ void NetworkManager::AcceptListener(SessionType _eType)
     {
         if (l.sessionType == _eType)
         {
-			l.listener.PostAccept(_eType);
+			l.listener->PostAccept(_eType);
 		}
 	}
 }

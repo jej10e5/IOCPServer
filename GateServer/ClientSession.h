@@ -8,5 +8,5 @@ public:
 		Init(SessionType::CLIENT);
 	};
 
-	void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) override;
+	void OnRecvCompleted(RecvCtx* _pContext, DWORD _dwRecvLen) override;
 };

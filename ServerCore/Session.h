@@ -24,9 +24,8 @@ public:
 	}
 	void Init();
 	bool Recv();
-	virtual void OnRecvCompleted(IocpContext* _pContext ,DWORD _dwRecvLen)=0;
+	virtual void OnRecvCompleted(RecvCtx* _pContext ,DWORD _dwRecvLen)=0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
-	void OnAcceptCompleted(IocpContext* _pContext);
 	void Disconnect();
 
 	// 패킷 구현부

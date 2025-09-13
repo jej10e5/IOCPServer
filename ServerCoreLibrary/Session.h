@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 struct IocpContext;
+struct RecvCtx;
 
 class Session
 {
@@ -19,14 +20,13 @@ public:
 	void Init(SessionType _eType);
 	bool Recv();
 	// 순수 가상 함수로 구현 -> 상속 받는 쪽에서 처리하는 부분이 달라짐
-	virtual void OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen) = 0;
+	virtual void OnRecvCompleted(RecvCtx* _pContext, DWORD _dwRecvLen) = 0;
 	void OnSendCompleted(IocpContext* _pContext, DWORD _dwSendLen);
-	void OnAcceptCompleted(IocpContext* _pContext);
 	void Disconnect();
 	void SetAcceptedSocket(SOCKET _socket) { m_AcceptSocket = _socket; }
 	void SetListenerSocket(SOCKET _socket) { m_ListenSocket = _socket; }
 	void SetOnDisconnect(DisconnectCb cb) { m_onDisconnect = std::move(cb); }
-
+	void OnAccepted();
 	UINT64 GetSessionId() const { return m_ui64SessionId; }
 
 	// 패킷 구현부

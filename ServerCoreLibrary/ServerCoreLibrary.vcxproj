@@ -27,7 +27,6 @@
     <ClCompile Include="PacketDispatcher.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
-    <ClCompile Include="ServerManager.cpp" />
     <ClCompile Include="ServerSession.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
@@ -42,7 +41,6 @@
     <ClInclude Include="PacketDispatcher.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RingBuffer.h" />
-    <ClInclude Include="ServerManager.h" />
     <ClInclude Include="ServerSession.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />

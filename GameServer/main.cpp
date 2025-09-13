@@ -9,7 +9,7 @@
 #include "DBConfigReader.h"
 
 
-void InitGateHandlers()
+void InitGameHandlers()
 {
     // 패킷 핸들러 등록
     REGISTER_HANDLER(CM_ECHO, GamePacketHandler::Handle_Eco);
@@ -19,17 +19,23 @@ void InitGateHandlers()
 
 int main()
 {
-    // 0) db.ini 로드
-    DBConfigReader dbcfg;
+    // DB 세팅 로드
+    CDBConfigReader dbcfg;
     if (!dbcfg.Load())
     {
         std::wcerr << L"[ERROR] db.ini 로딩 실패\n";
         return -1;
     }
     const DBConfig& db = dbcfg.DB();
+    // DB 초기화 및 연결
+    if (!DBManager::Instance().Initialize(db.connStr, db.poolSize, db.healthSec))
+    {
+        std::cerr << "[ERROR] DBManager 초기화 실패\n";
+        return -2;
+    }
 
 
-    // 1-1. IOCP Core 초기화
+    // 1. IOCP Core 초기화
     IocpCore& iocp = IocpCore::GetInstance();
     if (!iocp.Initialize())
     {
@@ -37,38 +43,32 @@ int main()
         return -1;
     }
 
-    // 1-2. DB 초기화 및 연결
-    if (!DBManager::Instance().Initialize(db.connStr, db.poolSize, db.healthSec))
-    {
-        std::cerr << "[ERROR] DBManager 초기화 실패\n";
-        return -2;
-    }
 
     //2. SessionManager에 Session 생성 로직 주입
-    //게이트에서는 클라이언트 세션과 서버 세션을 관리
     SessionManager::GetInstance().RegisterFactory(SessionType::CLIENT, []() {
         return new ClientSession();
         });
 
-
     // 3. 패킷 핸들러 초기화
-    InitGateHandlers();
+    InitGameHandlers();
 
+   
     // 4. 네트워크 바인딩 및 리슨
     NetworkManager& network = NetworkManager::GetInstance();
-
-    // 5. Accept 시작
     network.InitFromConfig();
 
-    // 6. 워커 스레드 가동
+    // 5. 워커 스레드 가동
     iocp.Run();
 
     LOG("IOCP 연결 시작\n");
 
     g_GameManager.StartLoop(std::chrono::milliseconds(50));
 
-    for (std::string line; std::getline(std::cin, line); )
-        if (line == "q") break;
+    for (string line; getline(cin, line); )
+    {
+        if (line == "quit") 
+            break;
+    }
 
     g_GameManager.StopLoop();
 

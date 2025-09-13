@@ -4,7 +4,7 @@
 #include "PacketDispatcher.h"
 
 
-void ClientSession::OnRecvCompleted(IocpContext* _pContext, DWORD _dwRecvLen)
+void ClientSession::OnRecvCompleted(RecvCtx* _pContext, DWORD _dwRecvLen)
 {
 	// 1. 수신 길이 0이면 클라이언트가 종료한 것
 	if (_dwRecvLen == 0)

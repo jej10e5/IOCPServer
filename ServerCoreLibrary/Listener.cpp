@@ -50,14 +50,16 @@ bool Listener::Init(UINT16 _port)
 	int result = WSAIoctl(
 		m_ListenSocket,
 		SIO_GET_EXTENSION_FUNCTION_POINTER,
-		&guidAcceptEx,
-		sizeof(guidAcceptEx),
-		&m_lpfnAcceptEx,
-		sizeof(m_lpfnAcceptEx),
-		&bytes,
-		NULL,
-		NULL
-	);
+		&guidAcceptEx, sizeof(guidAcceptEx),
+		&m_lpfnAcceptEx, sizeof(m_lpfnAcceptEx),
+		&bytes, nullptr, nullptr);
+
+	if (result == SOCKET_ERROR || m_lpfnAcceptEx == nullptr)
+	{
+		ERROR_LOG("AcceptEx 로딩 실패 : " << WSAGetLastError());
+		return false;
+	}
+	LOG("AcceptEx=%p listen=%llu"<< m_lpfnAcceptEx<< (unsigned long long)m_ListenSocket);
 	// 확장 함수에 대한 포인터를 얻어옴
 	// AcceptEx() 직접 호출하지 않고 함수 포인터를 얻어오는 이유
 	// : Winsock의 확장함수로 정식으로 Windows API에 등록된 함수가 아니기 때문.
@@ -73,32 +75,31 @@ bool Listener::Init(UINT16 _port)
 	// Listen 소켓 IOCP 등록
 	// os에서 어떤 요청이 끝나면 이벤트를 보낼 iocp 핸들 등록 하는 부분
 	IocpCore& iocpCore = IocpCore::GetInstance();
-	iocpCore.RegisterSocket(m_ListenSocket, 0);
-
+	if (!iocpCore.RegisterSocket(m_ListenSocket, reinterpret_cast<ULONG_PTR>(this)))
+	{
+		ERROR_LOG("Listener IOCP 등록 실패");
+		closesocket(m_ListenSocket);
+		return false;
+	}
 	return true;
 
 }
 
 bool Listener::PostAccept(SessionType _eType)
 {
-	SessionManager& sessionManager = SessionManager::GetInstance();
-	Session* pSession = sessionManager.GetEmptySession(_eType);
-	if (!pSession) 
-	{ 
-		ERROR_LOG("no empty session"); 
-		return false; 
-	}
 
 	SOCKET clientSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	pSession->SetAcceptedSocket(clientSocket);
-	pSession->SetListenerSocket(m_ListenSocket);
-	
-	//g_IocpCore.RegisterSocket(clientSocket, reinterpret_cast<ULONG_PTR>(pSession));
+	if (clientSocket == INVALID_SOCKET) 
+	{
+		ERROR_LOG("WSASocket 실패 : " << WSAGetLastError());
+		return false;
+	}
 
-	IocpContext* pContext = new IocpContext();
-	ZeroMemory(pContext, sizeof(IocpContext));
+	AcceptCtx* pContext = new AcceptCtx();
+	ZeroMemory(pContext, sizeof(AcceptCtx));
 	pContext->eOperation = IocpOperation::ACCEPT;
-	pContext->pSession = pSession;
+	pContext->accepted = clientSocket;
+	pContext->sessionType = _eType;
 	DWORD dwReceived = 0;
 
 	//iocp큐에 accept이벤트 넘김
@@ -106,21 +107,19 @@ bool Listener::PostAccept(SessionType _eType)
 	// 클라이언트가 접속해올 때까지 OS에게 비동기 연결 수락을 요청
 	BOOL result = m_lpfnAcceptEx(
 		m_ListenSocket,				// 리슨 소켓 (수신용)
-		clientSocket,				// 연결될 클라이언트 소켓
-		pContext->cBuffer,			// 주소 정보를 저장할 버퍼
+		pContext->accepted,				// 연결될 클라이언트 소켓
+		pContext->addrBuf,			// 주소 정보를 저장할 버퍼
 		0,							// 사용자 데이터 버퍼 크기 (보통 0)
 		sizeof(SOCKADDR_IN) + 16,	// 로컬 주소 크기
 		sizeof(SOCKADDR_IN) + 16,	// 원격 주소 크기
 		&dwReceived,				// (거의 사용 안함)
-		pContext					// OVERLAPPED 구조체
+		&pContext->ov					// OVERLAPPED 구조체
 	);
 
 	if (result == FALSE && WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		ERROR_LOG("AcceptEx 실패 : " << WSAGetLastError());
 		closesocket(clientSocket); // 소켓 닫고
-		SessionManager& sessionManager = SessionManager::GetInstance();
-		sessionManager.Release(_eType, pSession); // 세션 반환
 		delete pContext;
 		return false;
 	}
@@ -128,3 +127,41 @@ bool Listener::PostAccept(SessionType _eType)
 	return true;
 
 }
+
+void Listener::OnAcceptCompleted(AcceptCtx* _pCtx, DWORD _dwBytes)
+{
+	SOCKET accepted = _pCtx->accepted;
+
+	// 필수: 수락 컨텍스트 연결
+	setsockopt(accepted, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
+		reinterpret_cast<const char*>(&m_ListenSocket), sizeof(m_ListenSocket));
+
+	// 세션 획득(풀)
+	Session* pSession = SessionManager::GetInstance().GetEmptySession(_pCtx->sessionType);
+	if (pSession == nullptr)
+	{
+		// 혼잡: 즉시 종료/로그, 슬롯 보충만
+		closesocket(accepted);
+		PostAccept(_pCtx->sessionType);
+		return;
+	}
+
+	// 수락 소켓 IOCP 연관(key=Session*)
+	if (!IocpCore::GetInstance().RegisterSocket(accepted, reinterpret_cast<ULONG_PTR>(pSession)))
+	{
+		closesocket(accepted);
+		SessionManager::GetInstance().Release(_pCtx->sessionType, pSession);
+		PostAccept(_pCtx->sessionType);
+		return;
+	}
+
+	// 세션 초기화 및 첫 수신
+	pSession->SetAcceptedSocket(accepted);
+	pSession->SetListenerSocket(m_ListenSocket);
+	pSession->OnAccepted();
+	pSession->Recv();
+	// 다음 Accept 슬롯 보충
+	PostAccept(_pCtx->sessionType);
+}
+
+

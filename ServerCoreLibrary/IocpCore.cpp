@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "IocpCore.h"
 #include "NetworkManager.h"
+#include "SessionManager.h"
 
 bool IocpCore::Initialize()
 {
@@ -12,7 +13,7 @@ bool IocpCore::Initialize()
         return false;
     }
 
-    // 2. 완료 포트 생성
+    // 2. 완료 포트(CP) 생성
     m_iocpHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
     if (m_iocpHandle == NULL)
@@ -127,41 +128,63 @@ void IocpCore::WorkerLoop()
         }
 
         // IocpContext로 캐스팅 (OVERLAPPED 확장 구조)
-        IocpContext* pContext = reinterpret_cast<IocpContext*>(overlapped);
+        IocpContext* pBase = reinterpret_cast<IocpContext*>(overlapped);
 
         // 오류 완료 처리 : 세션 정리/메모리 누수 방지
         if (result == FALSE) 
         {
-             DWORD err = GetLastError();
-            // RECV/SEND 오류 → 세션 종료
-            if (pContext->eOperation == IocpOperation::RECV || pContext->eOperation == IocpOperation::SEND) 
+            if (pBase->eOperation == IocpOperation::ACCEPT)
             {
-                pContext->pSession->Disconnect();
-                
+                auto* actx = static_cast<AcceptCtx*>(pBase);
+                closesocket(actx->accepted);
+                auto* listener = reinterpret_cast<Listener*>(completionKey);
+                listener->PostAccept(actx->sessionType);
+                delete actx;
+                continue;
             }
-            // ACCEPT 오류 → 세션 반환 및 다음 Accept 재포스트는 Session/Listener 쪽 로직에 위임
-            delete pContext;
-            continue;
+            else
+            {
+                Session* session = reinterpret_cast<Session*>(completionKey);
+                // RECV/SEND 오류 → 세션 종료
+                session->Disconnect();
+                delete pBase;
+                continue;
+            }
             
         }
 
         // 작업 종류에 따라 분기
-        switch (pContext->eOperation)
+        switch (pBase->eOperation)
         {
-        case IocpOperation::RECV:
-            pContext->pSession->OnRecvCompleted(pContext, bytesTransferred);
-            break;
-        case IocpOperation::SEND:
-            pContext->pSession->OnSendCompleted(pContext, bytesTransferred);
-            break;
+
         case IocpOperation::ACCEPT:
-            pContext->pSession->OnAcceptCompleted(pContext);
+        {
+            Listener* listener = reinterpret_cast<Listener*>(completionKey);
+            auto* pAccept = static_cast<AcceptCtx*>(pBase);
+            listener->OnAcceptCompleted(pAccept, bytesTransferred); // 여기서 세션 획득/등록/Recv 선게시
+
+            delete pAccept;
             break;
+        }
+        case IocpOperation::RECV:
+        {
+            Session* session = reinterpret_cast<Session*>(completionKey);
+            auto* rctx = static_cast<RecvCtx*>(pBase);
+            rctx->pSession->OnRecvCompleted(rctx, bytesTransferred);
+            delete rctx;
+            break;
+        }
+        case IocpOperation::SEND:
+        {
+            Session* session = reinterpret_cast<Session*>(completionKey);
+            auto* sctx = static_cast<SendCtx*>(pBase);
+            sctx->pSession->OnSendCompleted(sctx, bytesTransferred);
+            delete sctx;
+            break;
+        }
         default:
             break;
         }
-
-        delete pContext;
     }
 }
 

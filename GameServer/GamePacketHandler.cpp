@@ -46,18 +46,15 @@ void GamePacketHandler::Handle_Chat(Session* _pSession, const char* _pData, UINT
 	// 응답 패킷 구성
 	SP_CHAT sendMsg;
 
-	sendMsg._i64Unique = _pSession->GetSessionId();
 	auto pUser = g_GameManager.FindUserById(_pSession->GetSessionId());
 	if (pUser == NULL)
 		return;
 
+	sendMsg._i64Unique = pUser->GetUnique();
 	pUser->GetName(sendMsg._id);
 	memcpy(sendMsg._chat, pMsg->_chat, MAX_CHAT_LENGTH);
-	std::wstring wname = Utf8ToWide(sendMsg._id);
-	std::wstring wchat = Utf8ToWide(sendMsg._chat);
-	std::wcout << L"chat - [" << wname << L"] : " << wchat << L"\n";
 
-	//_pSession->SendPacket(reinterpret_cast<const char*>(&sendMsg), sendMsg._header.size);
+
 	SessionManager& sessionManager = SessionManager::GetInstance();
 	sessionManager.BroadCastActive((char*)&sendMsg, sendMsg._header.size);
 }
@@ -80,7 +77,7 @@ void GamePacketHandler::Handle_Login(Session* _pSession, const char* _pData, UIN
 			// DB 결과는 워커 스레드에서 옴 → 게임 스레드 큐로 마샬링
 			GameDispatcher::GetInstance().PostToGameThread([sessionId, unique, pMsg]
 				{
-					Session* pSession = g_SessionManager.FindByToken(sessionId);
+					Session* pSession = SessionManager::GetInstance().FindByToken(sessionId);
 					if (!pSession) return;
 
 					g_GameManager.Login(pSession, unique, pMsg->_id);

@@ -22,7 +22,6 @@ public:
 	CUnitPC* GetEmptyPC();
 	void ReleasePC(CUnitPC* _pUser);
 
-
 private:
 	void RunLoop();
 
