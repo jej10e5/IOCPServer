@@ -1,10 +1,13 @@
 
-# IOCP 기반 비동기 서버 코어
+# IOCP 기반 채팅 / 게임 서버 코어 개발
+
 [IOCP Server](https://www.notion.so/IOCP-25292dff9081805aae49c7d2d1165d73?source=copy_link)
 
 멀티스레드 워커 풀과 세션 풀(Session Pool)을 갖춘 IOCP(I/O Completion Port) 기반 네트워크 서버 코어입니다. 안정적인 연결 처리, 패킷 프레이밍, 전송 상태 머신을 제공하며 Gate / Game / GameDB 등 확장형 구조의 공통 네트워크 코어로 사용됩니다.
 
 ---
+## 동작
+https://github.com/user-attachments/assets/04c12b60-3022-44f9-9179-855c8aca51cd
 
 ## 주요 특징
 
