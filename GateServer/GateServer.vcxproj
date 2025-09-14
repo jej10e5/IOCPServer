@@ -19,17 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClientSession.cpp" />
     <ClCompile Include="GatePacketHandler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="ServerManager.cpp" />
-    <ClCompile Include="ServerSession.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientSession.h" />
     <ClInclude Include="GatePacketHandler.h" />
-    <ClInclude Include="ServerManager.h" />
-    <ClInclude Include="ServerSession.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServerCommon\ServerCommon.vcxproj">
